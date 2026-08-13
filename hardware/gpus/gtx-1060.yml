@@ -1,0 +1,12 @@
+name: NVIDIA GeForce GTX 1060 6GB
+vendor: NVIDIA
+architecture: Pascal
+release_year: 2016
+vram_gb: 6
+typical_used_price_usd_min: 50
+typical_used_price_usd_max: 80
+used_price_date: 2026-03
+power_tdp_w: 120
+pcie_gen: 3
+inference_notes:
+  - No tensor cores; limited VRAM.

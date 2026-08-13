@@ -1,0 +1,8 @@
+model_name,model_family,parameter_count_billions,active_parameters_billions,architecture_type,recommended_vram_gb_q4,recommended_ram_cpu_only_gb,notes
+qwen3-1.7b,Qwen3,1.7,1.7,Dense,Fits entirely on 8 GB GPU,Q2 format runs comfortably even on lower-power devices. Good test target for entry hardware.
+qwen3-4b,Qwen3,3.96,3.96,Dense,<8 GB (Q4),~10 GB (CPU only),"Small dense model for consumer GPUs."
+qwen3-8b,Qwen3,7.92,7.92,Dense,Fits entirely on 12 GB GPU,Q4 runs well on RTX 3060 and similar hardware. Widely supported.
+llama-3.1-8b,Llama3.1,8.03,8.03,Dense,Fits on 12GB Q4K_M,GDPR-aware training data; good at coding tasks. Popular quantization target for consumer GPUs.
+mistral-7b-v0.3,Mistral,7.25,7.25,Dense,<8 GB (Q4),"Compact and very efficient."
+qwen3-32b-a3b,Qwen3,32.71,6.54,"MoE: Qwen3","Partial offload ~38 layers on 12GB; significant RAM needed for full CPU fallback.","Best used with partial GPU offload + flash attention for KV cache."
+gemma-2-27b,Gemma2,26.95,26.95,Dense,"Need >24 GB for Q4K_M (or heavy spill)","Requires large system RAM or multi-GPU"

@@ -1,0 +1,410 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/mw00/peasant-smith/main/benchmarks/schema/benchmark-schema.json",
+  "title": "Peasant Smith Benchmark Schema",
+  "description": "Schema for structured benchmark results in the Peasant Smith project. Version 1.0.",
+  "version": "1.0",
+  "type": "object",
+  "required": ["schema_version", "model", "hardware", "configuration", "performance", "result_classification"],
+  "properties": {
+    "example": {
+      "type": "boolean",
+      "description": "Set to true for example/template data that is not a real benchmark result"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Benchmark schema version (e.g., '1.0', '2.0'). Breaking changes increment the major version."
+    },
+    "model": {
+      "$ref": "#/definitions/model"
+    },
+    "hardware": {
+      "$ref": "#/definitions/hardware"
+    },
+    "software": {
+      "$ref": "#/definitions/software"
+    },
+    "configuration": {
+      "$ref": "#/definitions/configuration"
+    },
+    "performance": {
+      "$ref": "#/definitions/performance"
+    },
+    "memory": {
+      "$ref": "#/definitions/memory"
+    },
+    "power": {
+      "$ref": "#/definitions/power"
+    },
+    "reproducibility": {
+      "$ref": "#/definitions/reproducibility"
+    },
+    "result_classification": {
+      "$ref": "#/definitions/result_classification"
+    }
+  },
+  "additionalProperties": true,
+  "definitions": {
+    "model": {
+      "type": "object",
+      "required": ["model_name"],
+      "properties": {
+        "model_name": {
+          "type": "string",
+          "description": "Exact model name/identifier (e.g., 'qwen3-32b', 'llama-3.1-8b')"
+        },
+        "model_family": {
+          "type": "string",
+          "description": "Model family/architecture type (e.g., 'Qwen3', 'Llama3.1', 'Gemma2', 'Mistral') "
+        },
+        "parameter_count": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total parameter count (floating point)"
+        },
+        "active_parameter_count": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Active parameters per forward pass — relevant for MoE models"
+        },
+        "model_version": {
+          "type": "string",
+          "description": "Version tag or release identifier (e.g., 'v1.5', '2026-03') "
+        },
+        "quantization": {
+          "type": ["string", "null"],
+          "description": "Quantization level / method (e.g., 'Q4_K_M', 'IQ3_XXS', 'BF16') "
+        },
+        "quantization_format": {
+          "type": ["string", "null"],
+          "description": "Storage format (e.g., 'GGUF', 'safetensors', 'GPTQ', 'AWQ')"
+        },
+        "model_file_size_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Model file size on disk in gigabytes"
+        },
+        "context_limit": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Maximum context window the model supports (tokens)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "hardware": {
+      "type": "object",
+      "required": ["gpu_name"],
+      "anyOf": [
+        {"required": ["gpu_name"]},
+        {"required": ["cpu_name"]}
+      ],
+      "properties": {
+        "gpu_name": {
+          "type": ["string", "null"],
+          "description": "GPU model name (e.g., 'NVIDIA RTX 3060', 'AMD RX 6700 XT') or null for CPU-only"
+        },
+        "gpu_vendor": {
+          "type": ["string", "null"],
+          "enum": ["NVIDIA", "AMD", "Intel", "Apple", "unknown", null],
+          "description": "GPU vendor"
+        },
+        "gpu_architecture": {
+          "type": ["string", "null"],
+          "description": "GPU architecture (e.g., 'Ampere', 'Ada Lovelace', 'RDNA2')"
+        },
+        "gpu_vram_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total GPU VRAM in gigabytes"
+        },
+        "gpu_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "default": 1,
+          "description": "Number of GPUs (for multi-GPU setups)"
+        },
+        "cpu_name": {
+          "type": ["string", "null"],
+          "description": "CPU model name (e.g., 'AMD Ryzen 5 3600X')"
+        },
+        "cpu_cores": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Physical CPU cores"
+        },
+        "cpu_threads": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Logical CPU threads (with SMT/Hyperthreading)"
+        },
+        "system_ram_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total system RAM in gigabytes"
+        },
+        "system_ram_speed_mhz": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "RAM speed / frequency (e.g., '3200' for DDR4-3200)"
+        },
+        "storage_type": {
+          "type": ["string", "null"],
+          "enum": ["NVMe SSD", "SATA SSD", "HDD", "USB", "RAM disk", null],
+          "description": "Primary storage medium where model is loaded from"
+        },
+        "operating_system": {
+          "type": ["string", "null"],
+          "description": "OS name and version (e.g., 'Linux 6.8 Ubuntu Noble', 'Windows 11 24H2')"
+        }
+      },
+      "additionalProperties": true
+    },
+    "software": {
+      "type": "object",
+      "required": ["inference_backend"],
+      "properties": {
+        "inference_backend": {
+          "type": "string",
+          "description": "Inference engine name (e.g., 'llama.cpp', 'Ollama', 'vLLM', 'LM Studio')"
+        },
+        "backend_version": {
+          "type": ["string", "null"],
+          "description": "Backend/engine version string"
+        },
+        "runtime": {
+          "type": ["string", "null"],
+          "enum": ["CUDA", "ROCm", "Metal", "Vulkan", "GGML-CPU", "DirectML", null],
+          "description": "Compute runtime/API used"
+        },
+        "runtime_version": {
+          "type": ["string", "null"],
+          "description": "Runtime version (e.g., CUDA 12.4)"
+        },
+        "driver_version": {
+          "type": ["string", "null"],
+          "description": "Graphics driver version"
+        },
+        "framework_version": {
+          "type": ["string", "null"],
+          "description": "Framework/library version if applicable (e.g., PyTorch 2.4)"
+        },
+        "command_or_configuration": {
+          "type": ["string", "null"],
+          "description": "Exact command-line or configuration YAML/JSON used"
+        }
+      },
+      "additionalProperties": true
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "context_size": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Context window size used for the benchmark (tokens)"
+        },
+        "batch_size": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Batch size parameter"
+        },
+        "ubatch_size": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Ubatch parameter (llama.cpp)"
+        },
+        "gpu_layers": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Number of model layers offloaded to GPU"
+        },
+        "cpu_threads": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "CPU threads used for inference"
+        },
+        "flash_attention_type": {
+          "enum": ["Q4", "WQ_IQ2_XS", "WQ_IQ3_XXS", null],
+          "description": "Flash Attention KV cache type (llama.cpp)"
+        },
+        "kv_cache_quantization": {
+          "type": ["string", "null"],
+          "description": "KV cache quantization method used"
+        },
+        "offloading_strategy": {
+          "enum": ["full-gpu", "partial-gpu", "cpu-offload-gpu", "multi-gpu-spill", "cpu-only", null],
+          "description": "Overall memory offloading strategy"
+        },
+        "tensor_split": {
+          "type": ["string", "null"],
+          "description": "Tensor split ratios for multi-GPU (e.g., '1.0:0.5' or evenly distributed)"
+        },
+        "other_optimizations": {
+          "type": ["array", "string", "null"],
+          "items": {"type": "string"},
+          "description": "Other optimizations applied (freeform list)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "prompt_tokens_per_second": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Tokens per second during prompt/context processing"
+        },
+        "generation_tokens_per_second": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Tokens per second during token generation/decoding"
+        },
+        "time_to_first_token_seconds": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Time from prompt submission to first output token (seconds)"
+        },
+        "total_prompt_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Total number of tokens in the input prompt"
+        },
+        "total_generated_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Total number of output tokens generated"
+        },
+        "total_runtime_seconds": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total elapsed time for the benchmark run (seconds)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "gpu_memory_used_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Steady-state GPU memory usage during benchmark"
+        },
+        "system_memory_used_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Steady-state system RAM used by the inference process"
+        },
+        "total_memory_used_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Sum of GPU and system memory usage (approximate)"
+        },
+        "peak_gpu_memory_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Peak GPU memory allocation observed"
+        },
+        "peak_system_memory_gb": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Peak system RAM allocation by the process"
+        }
+      },
+      "additionalProperties": true
+    },
+    "power": {
+      "type": "object",
+      "properties": {
+        "gpu_power_w": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Average GPU power draw during benchmark (watts)"
+        },
+        "system_power_w": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total system power draw including PSU overhead (watts)"
+        },
+        "average_power_w": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Average power during the benchmark run"
+        },
+        "peak_power_w": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Peak power observed during the benchmark run (watts)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "reproducibility": {
+      "type": "object",
+      "properties": {
+        "benchmark_script_version": {
+          "type": ["string", "null"],
+          "description": "Version of the benchmark script used"
+        },
+        "git_commit": {
+          "$ref": "#/definitions/git_commit",
+          "description": "Git commit hash of the backend/engine at time of benchmark"
+        },
+        "timestamp": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when the benchmark was run"
+        },
+        "operator": {
+          "$ref": "#/definitions/operator_name",
+          "description": "GitHub username or handle of the contributor who ran this benchmark"
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Freeform notes about conditions, caveats, anomalies, environment"
+        },
+        "raw_output_reference": {
+          "type": ["string", "null"],
+          "description": "Path or URL to raw benchmark output/logs for full reproducibility"
+        }
+      },
+      "additionalProperties": true
+    },
+    "result_classification": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["rating"],
+          "properties": {
+            "rating": {
+              "enum": ["excellent", "good", "usable", "marginal", "unusable", "failed"]
+            },
+            "rationale": {
+              "$ref": "#/definitions/classification_rationale"
+            }
+          }
+        },
+        {
+          "type": "string",
+          "enum": ["excellent", "good", "usable", "marginal", "unusable", "failed"]
+        }
+      ]
+    },
+    "git_commit": {
+      "type": "string",
+      "pattern": "^\\w{7,40}$"
+    },
+    "operator_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 39
+    },
+    "classification_rationale": {
+      "type": "string",
+      "description": "Explanation for why this classification was chosen — required when rating deviates from the default t/s thresholds"
+    }
+  }
+}

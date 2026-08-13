@@ -1,0 +1,21 @@
+name: Optimization Report
+description: Document a tested optimization with measured before/after results 
+title: '[Optimization] '
+labels: [optimization]
+body:
+- type: textarea
+  id: summary_change_made
+  attributes:
+    label: What did you change?
+    placeholder: e.g., Changed --ubatch from 512 to 2048
+- type: input
+  id: model_tested
+  attributes:
+    label: Model tested (name and quant)
+    placeholder: qwen3-8b Q4_K_M
+  validations: {required: true}
+- type: textarea
+  id: baseline_results
+  attributes:
+    label: Baseline results BEFORE change
+    description: Include tokens/sec, TTFT, memory usage from original configuration

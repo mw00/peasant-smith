@@ -1,0 +1,62 @@
+name: Benchmark Submission
+description: Submit a benchmark result for review and inclusion
+title: '[Benchmark] '
+labels:
+- benchmark
+body:
+- type: markdown
+  attributes:
+    value: Thanks for contributing data! Fill in what you can -- results at usable
+      speeds are welcome too.
+- type: input
+  id: model_name
+  attributes:
+    label: Model name and quantisation
+    placeholder: qwen3-8b, Q4_K_M
+  validations:
+    required: true
+- type: dropdown
+  id: backend
+  attributes:
+    label: Inference backend used
+    options:
+    - llama.cpp
+    - Ollama
+    - LM Studio
+    - vLLM
+    - KoboldCPP
+    - Other
+  validations:
+    required: true
+- type: input
+  id: hardware
+  attributes:
+    label: Hardware specification
+    placeholder: RTX 3060 12GB, Ryzen 5 5600X
+  validations:
+    required: true
+- type: input
+  id: backend_version
+  attributes:
+    label: Backend version or commit number
+    placeholder: llama.cpp b4214
+- type: textarea
+  id: command_line_used
+  attributes:
+    label: Exact command line with all parameters
+    description: Full execution string including every option and value passed.
+    render: shell
+- type: input
+  id: tps_generation_speed
+  attributes:
+    label: Generation tokens per second (if known)
+    placeholder: '28.7'
+- type: input
+  id: ttft_measurement
+  attributes:
+    label: Time to first token, seconds (approximate is fine)
+    placeholder: '1.2'
+- type: textarea
+  id: notes_and_evidence_screenshots
+  attributes:
+    label: Notes or evidence attached as screenshots when applicable.

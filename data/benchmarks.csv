@@ -1,0 +1,3 @@
+benchmark_id,model_name,quantization,gpu_name,gpu_vram_gb,inference_backend,prompt_tps,generation_tps,ttft_seconds,memory_usage_gb,total_runtime_seconds,result_classification,example
+PS-EX01,qwen3-8b,Q4_K_M,NVIDIA GeForce RTX 3060,12,llama.cpp,42.3,28.7,1.2,9.0,9.4,good,true
+PS-EX02,qwen3-32b-a3b,Q4_K_M,NVIDIA GeForce RTX 3060,12,llama.cpp,18.5,7.2,2.7,29.2,73.6,usable,true

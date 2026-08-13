@@ -1,0 +1,31 @@
+name: Validate Data
+
+on:
+  pull_request:
+    paths: ['benchmarks/**', 'data/**']
+  push:
+    branches: ['main']
+    paths: ['benchmarks/**', 'data/**']
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  schema-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        run: pip install jsonschema>=4.20
+        
+      - name: Validate JSON benchmarks against schema v1.0
+        run: |
+          python3 scripts/validation/validate_benchmark.py benchmarks/examples/*.json

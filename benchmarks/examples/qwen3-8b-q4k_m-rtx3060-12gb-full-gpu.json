@@ -1,0 +1,77 @@
+{
+  "example": true,
+  "schema_version": "1.0",
+  "model": {
+    "model_name": "qwen3-8b",
+    "model_family": "Qwen3",
+    "parameter_count": 8047689216,
+    "active_parameter_count": 8047689216,
+    "model_version": "base, Jan 2025",
+    "quantization": "Q4_K_M",
+    "quantization_format": "GGUF",
+    "model_file_size_gb": 5.23,
+    "context_limit": null
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 1,
+    "cpu_name": "AMD Ryzen 5 5600X",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 32,
+    "system_ram_speed_mhz": 3600,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Linux 6.8 Ubuntu Noble"
+  },
+  "software": {
+    "inference_backend": "llama.cpp",
+    "backend_version": "b4214",
+    "runtime": "CUDA",
+    "runtime_version": "CUDA 12.4",
+    "driver_version": "560.35.03",
+    "framework_version": null,
+    "command_or_configuration": "./main -m qwen3-8b.Q4_K_M.gguf -ngl 99 -c 4096 -n 256 -t 12 -ubatch 512 "
+  },
+  "configuration": {
+    "context_size": 4096,
+    "batch_size": 2048,
+    "gpu_layers": 99,
+    "cpu_threads": 12,
+    "flash_attention_type": null,
+    "kv_cache_quantization": null,
+    "offloading_strategy": "full-gpu",
+    "tensor_split": null,
+    "other_optimizations": []
+  },
+  "performance": {
+    "prompt_tokens_per_second": 42.3,
+    "generation_tokens_per_second": 28.7,
+    "time_to_first_token_seconds": 1.2,
+    "total_prompt_tokens": 50,
+    "total_generated_tokens": 256,
+    "total_runtime_seconds": 9.4
+  },
+  "memory": {
+    "gpu_memory_used_gb": 7.8,
+    "system_memory_used_gb": 1.2,
+    "total_memory_used_gb": 9.0,
+    "peak_gpu_memory_gb": 8.1,
+    "peak_system_memory_gb": 1.5
+  },
+  "power": null,
+  "reproducibility": {
+    "benchmark_script_version": "ps-runner-0.1-dev",
+    "git_commit": null,
+    "timestamp": "2026-08-13T22:33:47+05:30",
+    "operator": "example-user",
+    "notes": "EXAMPLE DATA - NOT A REAL BENCHMARK. Demonstrates schema v1.0 structure for contributor reference. Model fully offloaded to GPU.",
+    "raw_output_reference": null
+  },
+  "result_classification": {
+    "rating": "good",
+    "rationale": "28.7 t/s is comfortable for interactive use. Full GPU fit with headroom for context expansion."
+  }
+}

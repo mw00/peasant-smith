@@ -1,0 +1,7 @@
+gpu_name,vendor,architecture,release_year,vram_gb,memory_bandwidth_gbps,theoretical_tflops,tpc_mem_bw_ratio,typical_used_price_usd,used_price_date,power_tdp_w,pcie_gen,known_limitations,inference_notes
+NVIDIA GeForce GTX 1060,NVIDIA,Pascal,2016,6,192.16,4.38,0.023,"$50-$80","Mar 2026",120,3.0,Limited VRAM for larger models; no tensor cores,Best with smaller quantized models (Q2-Q4). Good for <7B fully loaded.
+NVIDIA GeForce GTX 1080 Ti,NVIDIA,Pascal,2017,11,396.25,11.34,0.029,"$120-$180","Mar 2026",250,3.0,No tensor cores; high power draw,Handles 8B-14B models at Q4 level. No flash attn support.
+NVIDIA Tesla P40,NVIDIA,Pascal,2016,24,480.62,9.98,0.021,"$120-$200","Mar 2026",250,3.0,No display outputs; requires blower/adapter cooling,Excellent VRAM for the price. Ideal for large context windows with smaller models.
+NVIDIA GeForce RTX 3060,NVIDIA,Ampere,2021,12,360.49,13.00,0.036,"$150-$220","Mar 2026",170,4.0,None significant,Most popular budget AI GPU. Runs most current models at Q4 with good offload.
+NVIDIA GeForce RTX 3090,NVIDIA,Ampere,2020,24,933.48,35.58,0.038,"$400-$600","Mar 2026",350,4.0,None significant,Excellent for large models; tensor cores make flash attention very effective on this hardware.
+NVIDIA GeForce RTX 4090,NVIDIA,Ada Lovelace,2022,24,1008.00,82.58,0.082,"$800-$1600","Mar 2026",450,4.0,None significant,Flagship consumer card. Reference benchmark hardware — not the target audience but useful baseline data.

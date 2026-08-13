@@ -1,0 +1,79 @@
+{
+  "example": true,
+  "schema_version": "1.0",
+  "model": {
+    "model_name": "qwen3-32b",
+    "model_family": "Qwen3",
+    "parameter_count": 32710548992,
+    "active_parameter_count": 6542109719,
+    "model_version": "A3B MoE, Jan 2025",
+    "quantization": "Q4_K_M",
+    "quantization_format": "GGUF",
+    "model_file_size_gb": 20.5,
+    "context_limit": null
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 1,
+    "cpu_name": "AMD Ryzen 7 5800X",
+    "cpu_cores": 8,
+    "cpu_threads": 16,
+    "system_ram_gb": 64,
+    "system_ram_speed_mhz": 3200,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Linux 6.8 Ubuntu Noble"
+  },
+  "software": {
+    "inference_backend": "llama.cpp",
+    "backend_version": "b4314",
+    "runtime": "CUDA",
+    "runtime_version": "CUDA 12.5",
+    "driver_version": "560.35.03",
+    "framework_version": null,
+    "command_or_configuration": "./main -m qwen3-32b-a3b.Q4_K_M.gguf -ngl 38 -c 8192 -n 512 -t 16 --flash-attn-q4"
+  },
+  "configuration": {
+    "context_size": 8192,
+    "batch_size": 2048,
+    "gpu_layers": 38,
+    "cpu_threads": 16,
+    "flash_attention_type": "Q4",
+    "kv_cache_quantization": null,
+    "offloading_strategy": "partial-gpu",
+    "tensor_split": null,
+    "other_optimizations": [
+      "Flash attention Q4 to reduce KV-cache memory pressure"
+    ]
+  },
+  "performance": {
+    "prompt_tokens_per_second": 18.5,
+    "generation_tokens_per_second": 7.2,
+    "time_to_first_token_seconds": 2.7,
+    "total_prompt_tokens": 45,
+    "total_generated_tokens": 512,
+    "total_runtime_seconds": 73.6
+  },
+  "memory": {
+    "gpu_memory_used_gb": 10.9,
+    "system_memory_used_gb": 18.3,
+    "total_memory_used_gb": 29.2,
+    "peak_gpu_memory_gb": 11.4,
+    "peak_system_memory_gb": 22.7
+  },
+  "power": null,
+  "reproducibility": {
+    "benchmark_script_version": "ps-runner-0.1-dev",
+    "git_commit": null,
+    "timestamp": "2026-08-13T22:45:12+05:30",
+    "operator": "example-user",
+    "notes": "EXAMPLE DATA - NOT A REAL BENCHMARK. Demonstrates a partial offload scenario where the model does not fully fit on GPU. Flash Attention Q4 used to keep KV-cache pressure manageable on 12 GB VRAM with 8K context.",
+    "raw_output_reference": null
+  },
+  "result_classification": {
+    "rating": "usable",
+    "rationale": "7.2 t/s is workable for chat. Partial offload means the CPU and RAM bandwidth limit generation speed. TTFT of 2.7s is acceptable but noticeable. Would be better with more GPU layers — limited by VRAM."
+  }
+}

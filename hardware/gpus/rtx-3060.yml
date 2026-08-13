@@ -1,0 +1,12 @@
+name: NVIDIA GeForce RTX 3060 12GB
+vendor: NVIDIA
+architecture: Ampere
+release_year: 2021
+vram_gb: 12
+typical_used_price_usd_min: 150
+typical_used_price_usd_max: 220
+used_price_date: 2026-03
+power_tdp_w: 170
+pcie_gen: 4
+inference_notes:
+  - Most popular budget AI GPU on used market.

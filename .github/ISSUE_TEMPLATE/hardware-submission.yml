@@ -1,0 +1,25 @@
+name: Hardware Submission
+description: Add hardware entry to the database
+title: '[Hardware] '
+labels:
+- hardware
+body:
+- type: dropdown
+  id: hw_type
+  attributes:
+    label: Type of component submitted here
+  options:
+  - GPU
+  - CPU
+  - System
+- type: input
+  id: model_name_full
+  attributes:
+    label: Full model name
+    placeholder: NVIDIA GeForce RTX 3060
+  validations:
+    required: true
+- type: textarea
+  id: specs_and_notes
+  attributes:
+    label: Specifications and notes for inclusion in hardware database
