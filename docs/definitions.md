@@ -6,7 +6,6 @@
 - **Dense model**: All parameters active during every forward pass.
 - **MoE (Mixture of Experts)**: Subset of expert layers activate per token. `active_parameter_count` < `parameter_count`.
 
-
 ## Quantisation formats reference
 
 | Format | Bits = approx = Notes |
