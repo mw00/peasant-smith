@@ -49,11 +49,11 @@ You don't need a RTX 5090 or a DGX Spark to run AI locally — but figuring out 
 
 Results include a standardised classification to answer "is this actually usable?":
 
-- **excellent** — Fast response, comfortable interaction speed (≥15 t/s)
-- **good** — Smooth experience for most tasks (8–14 t/s)
-- **usable** — Acceptable for chat/writing with some patience (3–7 t/s)
-- **marginal** — Technically runs but frustrating for interactive use (1–2.9 t/s)
-- **unusable** — Below 1 t/s or unstable; experimental only
+- **excellent** — Fast response, comfortable interaction speed (≥36 t/s)
+- **good** — Smooth experience for most tasks (25–35 t/s)
+- **usable** — Acceptable for chat/writing with some patience (14–24 t/s)
+- **marginal** — Technically runs but frustrating for interactive use (3–13 t/s)
+- **unusable** — Below 2 t/s or unstable; experimental only
 - **failed** — Model will not run on this configuration
 
 Raw tokens/sec alone doesn't determine the classification: context length, TTFT, memory constraints, and stability all factor in. Submitters are encouraged to explain unusual classifications.
