@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0031",
+  "hardware_ref": "uranus",
+  "protocol": "kv-retention",
+  "model": {
+    "model_name": "q27bQ4",
+    "model_family": "Qwen3.8",
+    "parameter_count": 27000000000.0,
+    "active_parameter_count": 27000000000.0,
+    "quantization": "Q4_K_M",
+    "quantization_format": "GGUF",
+    "model_file_size_gb": 18.0
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 2,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 128,
+    "system_ram_speed_mhz": null,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS (kernel 7.0.0-29-generic)"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02"
+  },
+  "configuration": {
+    "context_size": 131072,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 18.16,
+    "generation_tps_mean": 18.16,
+    "generation_tps_max": 19.56,
+    "time_to_first_token_seconds": null,
+    "total_generated_tokens": 81518,
+    "total_runtime_seconds": 440.1
+  },
+  "tests": {
+    "attempted": 2,
+    "completed": 2
+  },
+  "ps_points": 261.6,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-10T16:31:09Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite on system 'uranus'. Custom Ollama Modelfile: num_ctx 98304, num_gpu 99. File size from ollama list. Needle retrieval at 60k and 120k tokens: both OK. Perfect recall at 120k context."
+  }
+}

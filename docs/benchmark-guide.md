@@ -13,7 +13,7 @@ This guide walks you through running a benchmark and submitting it to the projec
 Select a GGUF from Hugging Face or other source. Recommended starting points:
 
 | Your GPU | Model suggestion | Quantization |
-|---|---|---|
+|-|-|-|
 | <6 GB VRAM or no dedicated GPU | qwen3-1.7b | Q4_K_M, QQ3_XXS |
 | 6 GB VRAM (GTX 1060) | llama3.1-7b | Q4_K_M |
 | 12 GB VRAM (RTX 3060) | qwen3-8b, llama3.1-8b | Q4_K_M — fully loaded, excellent performance |
@@ -22,11 +22,11 @@ Select a GGUF from Hugging Face or other source. Recommended starting points:
 
 ### llama.cpp CLI (recommended for benchmarks)
 ```bash
-git clone https://https://github.com/ggml-org/llama.cpp && cd llama.cpp 
+git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp 
 cmake -B build -DGGML_CUDA=ON && cmake --build ./build -j$(nproc) # Linux CUDA
 # Then:
-./build/bin/main \-m your-model.Q4_K_M.gguf \
-  ---ngl 99 \
+./build/bin/main -m your-model.Q4_K_M.gguf \
+  --ngl 99 \
   -c 4096 \
   -n 256 \
   -t 12 \

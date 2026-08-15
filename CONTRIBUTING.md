@@ -18,13 +18,10 @@ Anyone who has ever asked "can I run this model on what I have?" and found the a
 
 ### Option 1: Use the Peasant Smith benchmark runner
 ```bash
-pip install -r scripts/benchmark/requirements.txt
-python scripts/benchmark/run_benchmark.py \
-  --model path/to/model.gguf \
-  --backend llama.cpp \
-  --context-size 4096 \
-  --prompt "Explain quantum computing in simple terms" \
-  --output results.json
+python3 scripts/benchmark/run_benchmark.py qwen3:8b \
+  --url http://YOUR-OLLAMA:11434 \
+  --hardware-ref your-system-slug \
+  --ctx 32768
 ```
 The runner auto-detects hardware and produces a JSON file conforming to [our schema](benchmarks/schema/benchmark-schema.json).
 
@@ -35,8 +32,9 @@ Any valid benchmark run is acceptable. The important thing is recording the data
 
 1. **Save your result as a JSON file** conforming to [the schema](benchmarks/schema/benchmark-schema.json). Place it in `benchmarks/raw/` with a descriptive filename:
    ```
-   benchmarks/raw/qwen3-8b-q4k_m-rtx3060-12gb-llama.cpp_b3957.json
+   benchmarks/raw/ps-reasoning-v1-qwen3-8b.json
    ```
+   Maintainers assign the final `PS-NNNN` id on merge.
 
 2. **Open a Pull Request** or create an issue using the [Benchmark Submission template](https://github.com/mw00/peasant-smith/issues/new?template=benchmark-submission.yml).
 
@@ -48,7 +46,7 @@ Any valid benchmark run is acceptable. The important thing is recording the data
 ## How results are validated
 
 Every submission passes automated validation:
-- Schema compliance check (JSON must validate against v1.0 schema)
+- Schema compliance check (JSON must validate against the v1.1 schema)
 - Required field presence check
 - Numeric range sanity checks (negative tokens/sec flagged)
 - Memory value plausibility (VRAM > GPU total flagged for review)

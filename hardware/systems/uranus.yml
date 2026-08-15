@@ -1,0 +1,48 @@
+# System profile: uranus
+# Canonical registry: data/systems.csv — the `hardware_ref` field in benchmark
+# records joins against the system_slug there.
+
+name: Uranus
+slug: uranus
+owner: mw00
+country: BR
+role: primary benchmark box
+introduced: 2026-08
+
+cpu:
+  model: Intel Xeon E5-1650 v4
+  architecture: Broadwell-EP
+  cores: 6
+  threads: 12
+  base_clock_ghz: 3.6
+  boost_clock_ghz: 4.0
+
+memory:
+  system_ram_gb: 128
+  type: DDR4 ECC
+  speed_mhz: 2133
+
+gpus:
+  - model: NVIDIA GeForce RTX 3060
+    count: 2
+    vram_gb_each: 12
+    architecture: Ampere
+    tensor_split: "5,1"            # llama-server default observed on Ling runs
+    pcie_note: >
+      Link negotiates Gen1 on this platform. Decode speed is compute-bound
+      and unaffected; only model load times suffer slightly.
+
+storage:
+  device: WD Blue SN570 1TB (WDC WDS100T2B0C)
+  type: NVMe SSD
+
+os: Ubuntu 26.04 LTS
+driver: "610.43.02"
+backends:
+  - Ollama 0.32.8 (port 11434)
+  - llama.cpp llama-server (dedicated systemd units, e.g. Ling on port 8081)
+
+notes:
+  - Built from used parts on a strict budget — the reference "peasant build".
+  - 128 GB RAM lets MoE models >100B spill from VRAM and still run interactively.
+  - Idle GPU draw measured ~17 W / ~23 W (2x RTX 3060, persistence mode on).

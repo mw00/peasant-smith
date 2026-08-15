@@ -46,3 +46,7 @@ def main():
         sys.exit(1)  
     
     print("\nAll passed!")
+
+
+if __name__ == "__main__":
+    main()

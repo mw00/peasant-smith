@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0010",
+  "hardware_ref": "uranus",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "gemma4-26b-a4b",
+    "model_family": "Gemma 4",
+    "parameter_count": 26000000000.0,
+    "active_parameter_count": 4000000000.0,
+    "quantization": null,
+    "quantization_format": "GGUF",
+    "model_file_size_gb": null
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 2,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 128,
+    "system_ram_speed_mhz": null,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS (kernel 7.0.0-29-generic)"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02"
+  },
+  "configuration": {
+    "context_size": null,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 44.09,
+    "generation_tps_mean": 42.86,
+    "generation_tps_max": 54.52,
+    "time_to_first_token_seconds": null,
+    "total_generated_tokens": 5589,
+    "total_runtime_seconds": 113.0
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 490.9,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-09T23:18:58Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite on system 'uranus'. MoE; active parameter count inferred from model tag (a4b). Optimized sampling params."
+  }
+}

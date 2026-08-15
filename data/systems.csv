@@ -1,0 +1,2 @@
+system_slug,system_name,owner,country,gpu_model,gpu_count,gpu_vram_gb_each,cpu_model,cpu_cores,cpu_threads,system_ram_gb,ram_speed_mhz,storage,os,role,notes
+uranus,Uranus,mw00,BR,NVIDIA GeForce RTX 3060,2,12,Intel Xeon E5-1650 v4,6,12,128,2133,WD Blue SN570 1TB NVMe,Ubuntu 26.04 LTS,Primary benchmark box,"2x RTX 3060 via tensor-split; 128 GB DDR4-2133 ECC. All Aug 2026 reasoning-v1 runs (PS-0001..PS-0031). PCIe runs at Gen1 link on this board — no measurable impact on decode speed."

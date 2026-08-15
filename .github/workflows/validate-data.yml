@@ -26,6 +26,15 @@ jobs:
       - name: Install dependencies
         run: pip install jsonschema>=4.20
         
-      - name: Validate JSON benchmarks against schema v1.0
+      - name: Validate JSON benchmarks against schema v1.1
         run: |
-          python3 scripts/validation/validate_benchmark.py benchmarks/examples/*.json
+          python3 scripts/validation/validate_benchmark.py benchmarks/examples/*.json benchmarks/raw/*.json
+
+      - name: Validate CSV databases
+        run: |
+          python3 scripts/validation/validate_csv.py
+
+      - name: Recompute PS Points + leaderboard (must be in sync)
+        run: |
+          python3 scripts/score/compute_score.py leaderboard --csv data/benchmarks.csv
+          git diff --exit-code LEADERBOARD.md

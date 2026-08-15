@@ -1,0 +1,20 @@
+# CPU profile: Intel Xeon E5-1650 v4
+
+name: Intel Xeon E5-1650 v4
+vendor: Intel
+architecture: Broadwell-EP
+release_year: 2016
+cores: 6
+threads: 12
+base_clock_ghz: 3.6
+boost_clock_ghz: 4.0
+memory_channels: 4
+memory_type: DDR4-2133 ECC
+typical_used_price_usd_min: 10
+typical_used_price_usd_max: 25
+used_price_date: 2026-08
+power_tdp_w: 140
+notes:
+  - Retired workstation CPU; extremely cheap on the used market.
+  - Paired with 128 GB ECC RAM it makes a capable MoE-spill host.
+  - Single-thread decode on CPU-only runs is modest — pair with a GPU.

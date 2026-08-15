@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0016",
+  "hardware_ref": "uranus",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Ling-3.0-Flash-AD",
+    "model_family": "BailingMoe3 (InclusionAI Ling)",
+    "parameter_count": null,
+    "active_parameter_count": null,
+    "quantization": "IQ4_XXS",
+    "quantization_format": "GGUF",
+    "model_file_size_gb": null
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 2,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 128,
+    "system_ram_speed_mhz": null,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS (kernel 7.0.0-29-generic)"
+  },
+  "software": {
+    "inference_backend": "llama.cpp (llama-server)",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02",
+    "command_or_configuration": "llama-server -m Ling-3.0-flash-AD-IQ4_XXS-merged.gguf -c 65536 -ncmoe 32 -ngl 99 --no-mmap -t 8 --tensor-split 5,1 --flash-attn 1"
+  },
+  "configuration": {
+    "context_size": 65536,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 21.24,
+    "generation_tps_mean": 21.76,
+    "generation_tps_max": 24.46,
+    "time_to_first_token_seconds": null,
+    "total_generated_tokens": 1557,
+    "total_runtime_seconds": 91.6
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 282.4,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-10T12:23:02Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite on system 'uranus'. MoE; served via dedicated llama-server systemd unit on port 8081. Dedicated llama-server, tensor-split 5,1, flash attention on."
+  }
+}

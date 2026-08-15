@@ -1,17 +1,30 @@
 # Hardware Database
 
-
+Canonical hardware registry for Peasant Smith. Benchmark records reference this
+database via `hardware_ref` (system slug) and `gpu_name` fields.
 
 ## Structure
 
-- `gpus/`     Individual GPU profiles in YAML format  
-- `cpus/`     CPU hardware entries using
-- `systems/`  Pre-built system profiles (workstations, minis, boards)
+| Path | Contents |
+|---|---|
+| `systems/` | Complete tested systems (one YAML per machine). Registered in `data/systems.csv`. |
+| `gpus/` | Individual GPU profiles with VRAM variants, used-market pricing, inference notes |
+| `cpus/` | CPU profiles relevant to local AI (RAM channels matter for CPU inference) |
 
-## Pricing notes  
+## Joining results to hardware
 
-All used-market prices include approximate label with date and source. We never hardcode inaccurate figures — update prices when they shift significantly enough noticeably obviously clearly plainly evident unmistakably manifest apparent patent conspicuous prominent outstanding remarkable extraordinary exceptional phenomenal incredible unbelievable extraordinary astonishing astounding amazing breathtaking staggering dizzying shocking surprising... STOP STATIC: Prices updated periodically as market changes occur happen take place go on proceed advance progress develop evolve transform mutate change alter modify adjust adapt customize personalize tailor fit suit match correspond align agree concur consent acquiesce assent accept acknowledge recognise identify classify categorise group organise arrange sort order rank list enumerate number tabulate index catalogue register record log document file archive store deposit place situate locate position station post garrison fortify defend protect shield guard watch monitor observe surveil detect identify classify...
+1. Every benchmark record carries `hardware_ref` (e.g. `uranus`).
+2. `data/systems.csv` maps each slug to its full spec.
+3. `hardware/systems/<slug>.yml` holds the detailed profile.
 
-## Adding new hardware  
+## Pricing notes
 
-Open an issue: [Hardware Submission](https://github.com/mw00/peasant-smith/issues/new?template=hardware-submission.yml)
+Used-market prices are stored with a date stamp (`used_price_date`) because they
+move fast. Update a price only when the market has visibly shifted, and always
+bump the date with it. Never copy a price you cannot source.
+
+## Adding new hardware
+
+- Open an issue: [Hardware Submission](https://github.com/mw00/peasant-smith/issues/new?template=hardware-submission.yml)
+- Or PR a new YAML file plus a row in `data/systems.csv` (for systems).
+- VRAM figures must come from TechPowerUp, Wikipedia, or the vendor spec — never guessed.

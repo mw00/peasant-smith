@@ -2,8 +2,8 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/mw00/peasant-smith/main/benchmarks/schema/benchmark-schema.json",
   "title": "Peasant Smith Benchmark Schema",
-  "description": "Schema for structured benchmark results in the Peasant Smith project. Version 1.0.",
-  "version": "1.0",
+  "description": "Schema for structured benchmark results in the Peasant Smith project. Version 1.1 adds the PS Points scoring fields, hardware_ref, protocol and per-run test accounting.",
+  "version": "1.1",
   "type": "object",
   "required": ["schema_version", "model", "hardware", "configuration", "performance", "result_classification"],
   "properties": {
@@ -14,7 +14,20 @@
     "schema_version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+$",
-      "description": "Benchmark schema version (e.g., '1.0', '2.0'). Breaking changes increment the major version."
+      "description": "Benchmark schema version (e.g., '1.0', '1.1'). Breaking changes increment the major version."
+    },
+    "benchmark_id": {
+      "type": ["string", "null"],
+      "pattern": "^PS-[A-Z0-9]{4,}$",
+      "description": "Registry identifier assigned by maintainers when a result is merged (e.g., 'PS-0001'). Submissions should leave this null."
+    },
+    "hardware_ref": {
+      "type": ["string", "null"],
+      "description": "Slug of the tested system as registered in data/systems.csv (e.g., 'uranus'). Allows joining results to a canonical hardware profile."
+    },
+    "protocol": {
+      "type": ["string", "null"],
+      "description": "Benchmark protocol used (e.g., 'reasoning-v1', 'context-sweep', 'kv-retention'). See docs/tests.md."
     },
     "model": {
       "$ref": "#/definitions/model"
@@ -37,6 +50,19 @@
     "power": {
       "$ref": "#/definitions/power"
     },
+    "tests": {
+      "type": ["object", "null"],
+      "properties": {
+        "attempted": {"type": "integer", "minimum": 0},
+        "completed": {"type": "integer", "minimum": 0}
+      },
+      "description": "Test accounting for suite-based protocols."
+    },
+    "ps_points": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Composite PS Points score for this run. Computed by scripts/score/compute_score.py — see docs/scoring.md for the formula."
+    },
     "reproducibility": {
       "$ref": "#/definitions/reproducibility"
     },
@@ -55,13 +81,13 @@
           "description": "Exact model name/identifier (e.g., 'qwen3-32b', 'llama-3.1-8b')"
         },
         "model_family": {
-          "type": "string",
-          "description": "Model family/architecture type (e.g., 'Qwen3', 'Llama3.1', 'Gemma2', 'Mistral') "
+          "type": ["string", "null"],
+          "description": "Model family/architecture type (e.g., 'Qwen3', 'Llama3.1', 'Gemma2', 'Mistral')"
         },
         "parameter_count": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "Total parameter count (floating point)"
+          "description": "Total parameter count"
         },
         "active_parameter_count": {
           "type": ["number", "null"],
@@ -69,12 +95,12 @@
           "description": "Active parameters per forward pass — relevant for MoE models"
         },
         "model_version": {
-          "type": "string",
-          "description": "Version tag or release identifier (e.g., 'v1.5', '2026-03') "
+          "type": ["string", "null"],
+          "description": "Version tag or release identifier"
         },
         "quantization": {
           "type": ["string", "null"],
-          "description": "Quantization level / method (e.g., 'Q4_K_M', 'IQ3_XXS', 'BF16') "
+          "description": "Quantization level / method (e.g., 'Q4_K_M', 'IQ3_XXS', 'BF16'). Use null (never a guess) when unknown."
         },
         "quantization_format": {
           "type": ["string", "null"],
@@ -95,7 +121,6 @@
     },
     "hardware": {
       "type": "object",
-      "required": ["gpu_name"],
       "anyOf": [
         {"required": ["gpu_name"]},
         {"required": ["cpu_name"]}
@@ -117,7 +142,7 @@
         "gpu_vram_gb": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "Total GPU VRAM in gigabytes"
+          "description": "Per-GPU VRAM in gigabytes (multiply by gpu_count for aggregate)"
         },
         "gpu_count": {
           "type": ["integer", "null"],
@@ -147,7 +172,7 @@
         "system_ram_speed_mhz": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "RAM speed / frequency (e.g., '3200' for DDR4-3200)"
+          "description": "RAM speed / frequency (e.g., 3200 for DDR4-3200)"
         },
         "storage_type": {
           "type": ["string", "null"],
@@ -192,7 +217,7 @@
         },
         "command_or_configuration": {
           "type": ["string", "null"],
-          "description": "Exact command-line or configuration YAML/JSON used"
+          "description": "Exact command-line or configuration used"
         }
       },
       "additionalProperties": true
@@ -225,9 +250,9 @@
           "minimum": 1,
           "description": "CPU threads used for inference"
         },
-        "flash_attention_type": {
-          "enum": ["Q4", "WQ_IQ2_XS", "WQ_IQ3_XXS", null],
-          "description": "Flash Attention KV cache type (llama.cpp)"
+        "flash_attention": {
+          "type": ["boolean", "null"],
+          "description": "Whether flash attention was enabled"
         },
         "kv_cache_quantization": {
           "type": ["string", "null"],
@@ -239,7 +264,7 @@
         },
         "tensor_split": {
           "type": ["string", "null"],
-          "description": "Tensor split ratios for multi-GPU (e.g., '1.0:0.5' or evenly distributed)"
+          "description": "Tensor split ratios for multi-GPU (e.g., '5,1')"
         },
         "other_optimizations": {
           "type": ["array", "string", "null"],
@@ -260,7 +285,17 @@
         "generation_tokens_per_second": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "Tokens per second during token generation/decoding"
+          "description": "Median tokens per second during generation — the primary throughput metric"
+        },
+        "generation_tps_mean": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Mean generation t/s across all tests in the run"
+        },
+        "generation_tps_max": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Peak generation t/s observed in the run"
         },
         "time_to_first_token_seconds": {
           "type": ["number", "null"],

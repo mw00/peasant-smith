@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0002",
+  "hardware_ref": "uranus",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Qwen35-Hermes",
+    "model_family": "Qwen3.5",
+    "parameter_count": null,
+    "active_parameter_count": null,
+    "quantization": null,
+    "quantization_format": "GGUF",
+    "model_file_size_gb": null
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 2,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 128,
+    "system_ram_speed_mhz": null,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS (kernel 7.0.0-29-generic)"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02"
+  },
+  "configuration": {
+    "context_size": null,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 38.09,
+    "generation_tps_mean": 38.32,
+    "generation_tps_max": 44.03,
+    "time_to_first_token_seconds": null,
+    "total_generated_tokens": 6888,
+    "total_runtime_seconds": 167.6
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 430.9,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-09T17:48:11Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite on system 'uranus'. Ollama import name; quantization not recorded at run time. Optimized sampling params (temp 0.5, top_p 0.85, top_k 40, min_p 0.05)."
+  }
+}
