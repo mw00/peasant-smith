@@ -2,7 +2,7 @@
 
 ### Making new AI run on old hardware.
 
-*"AI for people whose GPU budget is determined by what they can find on eBay."*
+*"AI for people whose GPU budget is determined by what they can find on used."*
 
 ---
 
@@ -12,7 +12,7 @@
 
 ## What is Peasant Smith?
 
-An open, community-driven effort to test new AI models on ordinary, old, used, and unconventional hardware — with a focus on optimization, reproducibility, affordability, and real-world usability.
+An open, community-driven effort to test new AI models on ordinary, old, used, and unconventional hardware — with a focus on optimisation, reproducibility, affordability, and real-world usability.
 
 Most AI benchmarks assume expensive, flagship hardware. Peasant Smith asks a different question:
 
@@ -20,15 +20,15 @@ Most AI benchmarks assume expensive, flagship hardware. Peasant Smith asks a dif
 
 ## Why this matters
 
-You don't need an RTX 4090 to run AI locally — but figuring out what *does* work takes testing, sharing, and honest reporting. This project collects structured benchmark data so you can answer questions like:
+You don't need a RTX 5090 or a DGX Spark to run AI locally — but figuring out what *does* work takes testing, sharing, and honest reporting. This project collects structured benchmark data so you can answer questions like:
 
-- Can a modern model run on my 12 GB GPU?
+- Can a modern model run on my 12GB GPU? 8GB GPU?
 - How much system RAM do I actually need?
 - What happens with partial offloading?
-- Which quantization level is both fast enough and good enough?
-- Does flash attention or KV-cache quantization make a practical difference?
+- Which quantisation level is both fast enough and good enough?
+- Does flash attention or KV-cache quantisation make a practical difference?
 - Can two cheap GPUs beat one expensive card?
-- What optimizations turn "impossible" into "usable"?
+- What optimisations turn "impossible" into "usable"?
 
 ## What we measure
 
@@ -42,12 +42,12 @@ You don't need an RTX 4090 to run AI locally — but figuring out what *does* wo
 | **Context scalability** | Usability at different context lengths |
 | **Power draw** | Where measurable — watts on consumer hardware |
 | **Model compatibility** | Which models run, which don't, and why |
-| **Optimization impact** | Measured before/after specific tweaks |
-| **Real-world usability** | A holistic judgment — numbers alone don't tell the whole story |
+| **Optimisation impact** | Measured before/after specific tweaks |
+| **Real-world usability** | A holistic judgement — numbers alone don't tell the whole story |
 
 ## Usability classification
 
-Results include a standardized classification to answer "is this actually usable?":
+Results include a standardised classification to answer "is this actually usable?":
 
 - **excellent** — Fast response, comfortable interaction speed (≥15 t/s)
 - **good** — Smooth experience for most tasks (8–14 t/s)
@@ -65,7 +65,7 @@ Raw tokens/sec alone doesn't determine the classification: context length, TTFT,
 | [`benchmarks/`](benchmarks/) | Structured benchmark data (JSON + CSV), schema definitions, examples |
 | [`hardware/`](hardware/) | Hardware database — GPUs, CPUs, systems, pricing notes |
 | [`models/`](models/) | Model profiles with hardware requirements and compatibility notes |
-| [`optimizations/`](optimizations/) | Optimization knowledge base — proven techniques with measured results |
+| [`optimisations/`](optimisations/) | Optimisation knowledge base — proven techniques with measured results |
 | [`scripts/`](scripts/) | Benchmark runner, validation tools, data utilities |
 | [`docs/`](docs/) | Methodology, contribution guides, definitions |
 | [`data/`](data/) | Flat-file databases (CSV) for quick queries and imports |
@@ -74,7 +74,7 @@ Raw tokens/sec alone doesn't determine the classification: context length, TTFT,
 
 1. **[Run a benchmark](docs/benchmark-guide.md)** — Use our scripts or your own toolchain
 2. **[Submit results](CONTRIBUTING.md)** — PR, issue template, or data drop
-3. **[Share an optimization](optimizations/README.md)** — Document what worked and by how much
+3. **[Share an optimisation](optimisations/README.md)** — Document what worked and by how much
 
 No hardware is "too old" to test. We actively encourage GTX 1060s, RTX 3060s, Tesla P40s, integrated graphics, CPUs-only setups, and unusual multi-GPU configurations. Failed experiments are valid contributions.
 
@@ -87,7 +87,7 @@ No hardware is "too old" to test. We actively encourage GTX 1060s, RTX 3060s, Te
 ## Reproducibility
 
 Every benchmark record preserves:
-- Exact model and quantization
+- Exact model and quantisation
 - Backend, backend version, drivers, OS
 - Hardware specification
 - Relevant commands and configurations
