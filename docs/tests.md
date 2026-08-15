@@ -12,7 +12,8 @@ succeeds or fails**, so anyone can reproduce or challenge a result.
 also capturing whether the model stays coherent under stress.
 
 **Shape:** 11 fixed prompts across 4 dimensions, run sequentially against one
-model at a time.
+model at a time. The **exact quantization** of the model is recorded in every
+result — it is as important as the speed number itself.
 
 | Dimension | Tests | What it stresses |
 |---|---|---|
@@ -26,16 +27,20 @@ Median (not mean) because one runaway test must not distort the score.
 
 **Run discipline (mandatory):**
 
-1. **One model at a time.** Load → run full suite → unload. Verify unload via
+1. **Record the exact quant.** The quantization is part of the result, not
+   metadata — a Q4_K_M number is meaningless without saying it is Q4_K_M.
+   Unknown quant → record `unknown`, never guess. This is the single most
+   important field in the record.
+2. **One model at a time.** Load → run full suite → unload. Verify unload via
    `/api/ps` (or `ollama ps`) before the next model. Concurrent residents steal
    VRAM and invalidate the numbers.
-2. **Fixed generation budget** (`num_predict` 8192 by default) so long-winded
+3. **Fixed generation budget** (`num_predict` 8192 by default) so long-winded
    models can't game the average with padding.
-3. **Chat transport, streaming off.** The runner measures end-to-end latency
+4. **Chat transport, streaming off.** The runner measures end-to-end latency
    including prompt evaluation.
-4. **Honor the model's own Modelfile parameters** unless the run is explicitly
+5. **Honor the model's own Modelfile parameters** unless the run is explicitly
    an "optimized params" variant (then record the overrides in notes).
-5. **One retry per failed test**, then record the failure and move on.
+6. **One retry per failed test**, then record the failure and move on.
    A model that cannot complete the suite is a valid result — see scoring.
 
 **Success criteria:**

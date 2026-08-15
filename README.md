@@ -37,16 +37,16 @@ build of 2× RTX 3060 12 GB, a Xeon E5-1650 v4, and 128 GB of cheap ECC RAM.
 
 | Model | Quant | Median t/s | Class | PS Points |
 |---|---|---:|---|---:|
-| LFM2.5-2.6B | Q4-class GGUF | 72.0 | excellent | 770 |
-| gemma4-26b-a4b (MoE, 4B active) | GGUF | 44.1 | excellent | 491 |
-| Qwen35-Hermes | GGUF | 40.9 | excellent | 459 |
+| LFM2.5-2.6B | unknown | 72.0 | excellent | 770 |
+| gemma4-26b-a4b (MoE, 4B active) | unknown | 44.1 | excellent | 491 |
+| Qwen35-Hermes | unknown | 40.9 | excellent | 459 |
 | Ornith-1.0-9B | Q6_K | 34.5 | excellent | 395 |
 | gemma-4-12b-it | UD-Q4_K_XL | 28.4 | excellent | 334 |
 | Ling-3.0-Flash (MoE) | IQ4_XXS | 21.2 | excellent | 282 |
 | q27bQ4 (Qwen3.8-27B) | Q4_K_M | 18.9 @ 128k ctx | excellent | 269 |
 | Muse-Glimmer-30B | UD-Q4_K_XL | 18.0 | excellent | 234 |
 | Qwen3.5-122B-A10B-MTP (MoE) | UD-IQ3_XXS | 8.0 | good | 131 |
-| gemma4-31b (dense) | GGUF | 6.5 | usable | 135 |
+| gemma4-31b (dense) | unknown | 6.5 | usable | 135 |
 
 The pattern is the whole thesis: **small efficient models and sparse MoE at
 Q4-class quants deliver interactive speeds on €200 of used GPUs; dense 30B+

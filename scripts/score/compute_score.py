@@ -147,9 +147,10 @@ def render_leaderboard(recs):
         tests = f"{t.get('completed')}/{t.get('attempted')}" if t.get("attempted") else "—"
         cls = rec.get("result_classification", "—")
         tps = perf.get("generation_tokens_per_second")
+        quant = m.get("quantization") or "unknown"
         lines.append(
             f"| {i} | {rec.get('benchmark_id') or '—'} | "
-            f"{m.get('model_name', '?')} | {m.get('quantization') or '—'} | "
+            f"{m.get('model_name', '?')} | {quant} | "
             f"{tps if tps is not None else '—'} | {tests} | {cls} | **{total:.0f}** |")
     lines.append("")
 
