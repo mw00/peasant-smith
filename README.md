@@ -2,7 +2,7 @@
 
 ### Making new AI run on old hardware.
 
-*"AI for people whose GPU budget is determined by what they can find on eBay."*
+*"AI for people whose GPU budget is determined by what they can find on used online."*
 
 ---
 
@@ -10,7 +10,7 @@
 [![Data License: CC-BY-4.0](https://img.shields.io/badge/Data%20License-CC--BY--4.0-green.svg)](benchmarks/LICENSE-DATA)
 [![Docs License: CC-BY-SA-4.0](https://img.shields.io/badge/Docs%20License-CC--BY--SA--4.0-green.svg)](docs/LICENSE-DOCS)
 
-Hi — I'm [manoel (mw00)](https://github.com/mw00). I build and benchmark local AI
+Hi — I'm [Manoel (mw00)](https://github.com/mw00). I build and benchmark local AI
 rigs out of used parts, and I publish every number I get, good or bad. This repo
 is that work, opened up: a structured database of real benchmark runs on budget
 hardware, with the methods, the scoring, and the raw records all public so
