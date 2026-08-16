@@ -74,6 +74,6 @@
   },
   "result_classification": {
     "rating": "usable",
-    "rationale": "7.2 t/s is workable for chat. Partial offload means the CPU and RAM bandwidth limit generation speed. TTFT of 2.7s is acceptable but noticeable. Would be better with more GPU layers — limited by VRAM."
+    "rationale": "7.2 t/s is workable for chat. Partial offload means the CPU and RAM bandwidth limit generation speed. TTFT of 2.7s is acceptable but noticeable. Would be better with more GPU layers - limited by VRAM."
   }
 }

@@ -4,7 +4,7 @@
  "hardware_ref": "gpu-box-01",
  "protocol": "reasoning-v1",
  "model": {
-  "model_name": "Qwen3.8-27B-Instruct",
+  "model_name": "Qwen3.8-27B",
   "model_family": "Qwen3.8",
   "parameter_count": 27000000000.0,
   "active_parameter_count": 27000000000.0,
@@ -53,6 +53,6 @@
  "reproducibility": {
   "timestamp": "2026-08-09T17:26:23Z",
   "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Ollama import predating q27bQ4; quantization not recorded at run time. File size from ollama list."
+  "notes": "reasoning-v1 suite on system 'uranus'."
  }
 }

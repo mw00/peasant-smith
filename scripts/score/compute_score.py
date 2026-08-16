@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PS Points scoring engine — Peasant Smith.
+"""PS Points scoring engine - Peasant Smith.
 
 Computes the composite PS Points score for benchmark records and generates
 the leaderboard. Formula and rationale: docs/scoring.md.

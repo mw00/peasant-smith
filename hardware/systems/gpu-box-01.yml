@@ -1,5 +1,5 @@
 # System profile: gpu-box-01
-# Canonical registry: data/systems.csv — the `hardware_ref` field in benchmark
+# Canonical registry: data/systems.csv - the `hardware_ref` field in benchmark
 # records joins against the system_slug there.
 
 slug: gpu-box-01
@@ -17,7 +17,7 @@ cpu:
 memory:
   system_ram_gb: 128
   type: DDR4 UDIMM desktop
-  speed_mhz: 2133
+  speed_mhz: 2400
   channels: 4
   notes: quad-channel via X99 (Machinist) motherboard
 

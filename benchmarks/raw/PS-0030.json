@@ -4,7 +4,7 @@
  "hardware_ref": "gpu-box-01",
  "protocol": "context-sweep",
  "model": {
-  "model_name": "Qwen3.8-27B-Instruct",
+  "model_name": "Qwen3.8-27B",
   "model_family": "Qwen3.8",
   "parameter_count": 27000000000.0,
   "active_parameter_count": 27000000000.0,

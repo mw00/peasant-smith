@@ -27,4 +27,4 @@ bump the date with it. Never copy a price you cannot source.
 
 - Open an issue: [Hardware Submission](https://github.com/mw00/peasant-smith/issues/new?template=hardware-submission.yml)
 - Or PR a new YAML file plus a row in `data/systems.csv` (for systems).
-- VRAM figures must come from TechPowerUp, Wikipedia, or the vendor spec — never guessed.
+- VRAM figures must come from TechPowerUp, Wikipedia, or the vendor spec - never guessed.

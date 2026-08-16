@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Peasant Smith benchmark runner — reasoning-v1 protocol.
+"""Peasant Smith benchmark runner - reasoning-v1 protocol.
 
 Runs the 11-test reasoning-v1 suite against one model on an Ollama endpoint,
 measures generation throughput (t/s), and writes a schema-valid JSON result
@@ -17,7 +17,7 @@ Usage:
 
 Example:
   python3 run_benchmark.py qwen3:8b --url http://192.168.0.55:11434 \
-      --hardware-ref uranus --ctx 32768
+      --hardware-ref gpu-box-01 --ctx 32768
 """
 import argparse, json, os, re, statistics, sys, time, urllib.request
 
@@ -66,7 +66,7 @@ TESTS = [
      "prompt": ("You have a terminal tool that runs shell commands and a web_search tool that "
                 "queries the internet. The user asks: 'what time is it in Tokyo right now?' "
                 "Which tool would you use and what command/query? Reply with a JSON object "
-                '{"tool": "terminal"|"web_search", "action": "..."}. Choose reflexively — '
+                '{"tool": "terminal"|"web_search", "action": "..."}. Choose reflexively - '
                 "do not overthink.")},
     {"dim": "wrong-route", "id": "interpret-intent",
      "prompt": ("The user says: 'my wife is coming to dinner tonight, what should I make?' "
@@ -130,7 +130,7 @@ def unload(url, model):
 
 def run_suite(args):
     url = args.url.rstrip("/")
-    print(f"== Peasant Smith benchmark runner — suite {SUITE} ==")
+    print(f"== Peasant Smith benchmark runner - suite {SUITE} ==")
     print(f"   model: {args.model}  endpoint: {url}")
 
     hardware = detect_hardware(url)
@@ -239,7 +239,7 @@ def main():
     p.add_argument("--ctx", type=int, default=None, help="num_ctx override")
     p.add_argument("--num-predict", type=int, default=8192)
     p.add_argument("--hardware-ref", default=None,
-                   help="hardware slug from data/systems.csv (e.g. uranus)")
+                   help="hardware slug from data/systems.csv (e.g. gpu-box-01)")
     p.add_argument("--gpu-layers", type=int, default=None)
     p.add_argument("--offload", default=None,
                    choices=["full-gpu", "partial-gpu", "cpu-offload-gpu",

@@ -22,12 +22,12 @@ Scoring formula: [docs/scoring.md](docs/scoring.md) · Protocols: [docs/tests.md
 | 12 | PS-0012 | gemma-4-12b-it | unknown | 27.7 | 11/11 | excellent | **327** |
 | 13 | PS-0016 | Ling-3.0-Flash-AD | unknown | 21.24 | 11/11 | excellent | **282** |
 | 14 | PS-0017 | Ling-3.0-Flash-AD | unknown | 20.22 | 11/11 | excellent | **272** |
-| 15 | PS-0030 | Qwen3.8-27B-Instruct | unknown | 18.89 | 6/6 | excellent | **269** |
-| 16 | PS-0031 | Qwen3.8-27B-Instruct | unknown | 18.16 | 2/2 | excellent | **262** |
+| 15 | PS-0030 | Qwen3.8-27B | unknown | 18.89 | 6/6 | excellent | **269** |
+| 16 | PS-0031 | Qwen3.8-27B | unknown | 18.16 | 2/2 | excellent | **262** |
 | 17 | PS-0018 | Muse-Glimmer-30B | unknown | 18.35 | 11/11 | excellent | **234** |
-| 18 | PS-0026 | Qwen3.8-27B-Instruct | unknown | 17.06 | 11/11 | excellent | **221** |
-| 19 | PS-0008 | Qwen3.8-27B-Instruct | unknown | 17.04 | 11/11 | excellent | **220** |
-| 20 | PS-0009 | Qwen3.8-27B-Instruct | unknown | 16.15 | 11/11 | excellent | **212** |
+| 18 | PS-0026 | Qwen3.8-27B | unknown | 17.06 | 11/11 | excellent | **221** |
+| 19 | PS-0008 | Qwen3.8-27B | unknown | 17.04 | 11/11 | excellent | **220** |
+| 20 | PS-0009 | Qwen3.8-27B | unknown | 16.15 | 11/11 | excellent | **212** |
 | 21 | PS-0028 | gemma4-31b | unknown | 13.96 | 11/11 | good | **190** |
 | 22 | PS-0011 | gemma4-31b | unknown | 6.53 | 11/11 | usable | **135** |
 | 23 | PS-0019 | Qwen3.5-122B-A10B-MTP | unknown | 8.12 | 11/11 | good | **131** |
@@ -49,7 +49,7 @@ Scoring formula: [docs/scoring.md](docs/scoring.md) · Protocols: [docs/tests.md
 | Ornith-1.0-9B | PS-0014 | **395** | 34.5 |
 | gemma-4-12b-it | PS-0013 | **334** | 28.38 |
 | Ling-3.0-Flash-AD | PS-0016 | **282** | 21.24 |
-| Qwen3.8-27B-Instruct | PS-0030 | **269** | 18.89 |
+| Qwen3.8-27B | PS-0030 | **269** | 18.89 |
 | Muse-Glimmer-30B | PS-0018 | **234** | 18.35 |
 | gemma4-31b | PS-0028 | **190** | 13.96 |
 | Qwen3.5-122B-A10B-MTP | PS-0019 | **131** | 8.12 |

@@ -23,7 +23,7 @@
     },
     "hardware_ref": {
       "type": ["string", "null"],
-      "description": "Slug of the tested system as registered in data/systems.csv (e.g., 'uranus'). Allows joining results to a canonical hardware profile."
+      "description": "Slug of the tested system as registered in data/systems.csv (e.g., 'gpu-box-01'). Allows joining results to a canonical hardware profile."
     },
     "protocol": {
       "type": ["string", "null"],
@@ -61,7 +61,7 @@
     "ps_points": {
       "type": ["number", "null"],
       "minimum": 0,
-      "description": "Composite PS Points score for this run. Computed by scripts/score/compute_score.py — see docs/scoring.md for the formula."
+      "description": "Composite PS Points score for this run. Computed by scripts/score/compute_score.py - see docs/scoring.md for the formula."
     },
     "reproducibility": {
       "$ref": "#/definitions/reproducibility"
@@ -92,7 +92,7 @@
         "active_parameter_count": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "Active parameters per forward pass — relevant for MoE models"
+          "description": "Active parameters per forward pass - relevant for MoE models"
         },
         "model_version": {
           "type": ["string", "null"],
@@ -285,7 +285,7 @@
         "generation_tokens_per_second": {
           "type": ["number", "null"],
           "minimum": 0,
-          "description": "Median tokens per second during generation — the primary throughput metric"
+          "description": "Median tokens per second during generation - the primary throughput metric"
         },
         "generation_tps_mean": {
           "type": ["number", "null"],
@@ -439,7 +439,7 @@
     },
     "classification_rationale": {
       "type": "string",
-      "description": "Explanation for why this classification was chosen — required when rating deviates from the default t/s thresholds"
+      "description": "Explanation for why this classification was chosen - required when rating deviates from the default t/s thresholds"
     }
   }
 }
