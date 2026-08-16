@@ -1,4 +1,4 @@
-# Benchmark Guide — Peasant Smith
+# Benchmark Guide - Peasant Smith
 
 This guide walks you through running a benchmark and submitting it to the project.
 
@@ -16,7 +16,7 @@ Select a GGUF from Hugging Face or other source. Recommended starting points:
 |-|-|-|
 | <6 GB VRAM or no dedicated GPU | qwen3-1.7b | Q4_K_M, QQ3_XXS |
 | 6 GB VRAM (GTX 1060) | llama3.1-7b | Q4_K_M |
-| 12 GB VRAM (RTX 3060) | qwen3-8b, llama3.1-8b | Q4_K_M — fully loaded, excellent performance |
+| 12 GB VRAM (RTX 3060) | qwen3-8b, llama3.1-8b | Q4_K_M - fully loaded, excellent performance |
 
 ## Step 2: Choose your backend
 
@@ -35,8 +35,8 @@ cmake -B build -DGGML_CUDA=ON && cmake --build ./build -j$(nproc) # Linux CUDA
 ```
 
 The CLI prints benchmark statistics at the end:
-- `prompt eval time` — used for prompt tokens/sec calculation
-- `generation speed` — generation tokens per second (already calculated)
+- `prompt eval time` - used for prompt tokens/sec calculation
+- `generation speed` - generation tokens per second (already calculated)
 
 ### Ollama approach:
 ```bash
@@ -68,4 +68,4 @@ Fill in a JSON file matching our schema ([see examples](benchmarks/examples/)). 
 - [ ] Hardware description matches actual hardware exactly (no "approximate" names)
 - [ ] Backend version command or configuration string copies exact text used for reproducibility
 
-Questions? Ask in Issues — we review promptly. No shame asking about anything related to setting up local AI testing infrastructure here!
+Questions? Ask in Issues - we review promptly. No shame asking about anything related to setting up local AI testing infrastructure here!

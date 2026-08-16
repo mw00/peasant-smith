@@ -13,7 +13,7 @@ database via `hardware_ref` (system slug) and `gpu_name` fields.
 
 ## Joining results to hardware
 
-1. Every benchmark record carries `hardware_ref` (e.g. `uranus`).
+1. Every benchmark record carries `hardware_ref` (e.g. `gpu-box-01`).
 2. `data/systems.csv` maps each slug to its full spec.
 3. `hardware/systems/<slug>.yml` holds the detailed profile.
 

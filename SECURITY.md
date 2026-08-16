@@ -25,4 +25,4 @@ These are treated more seriously than typical code vulnerabilities because they 
 
 ## Supported versions
 
-Only the current schema version (`v1.0` at time of writing) is actively maintained. Older data remains in the repository but may not pass new validation rules — that's by design, and older records are preserved with their original schema version tag.
+Only the current schema version (`v1.0` at time of writing) is actively maintained. Older data remains in the repository but may not pass new validation rules - that's by design, and older records are preserved with their original schema version tag.

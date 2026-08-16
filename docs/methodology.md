@@ -1,4 +1,4 @@
-# Benchmark Methodology — Peasant Smith
+# Benchmark Methodology - Peasant Smith
 
 ## Core principle
 
@@ -6,7 +6,7 @@ Results must be **reproducible** and **relevant to real users**. A number withou
 
 ## Metrics
 
-### Generation speed (output t/s) — primary
+### Generation speed (output t/s) - primary
 
 Tokens/sec during decoding, reported as the **median across the suite** (robust to outliers). Bands in [definitions.md](definitions.md).
 
@@ -24,23 +24,23 @@ Actual VRAM/RAM consumed, not theoretical. Measured steady-state.
 
 ## Run discipline
 
-1. **One model at a time** — load → suite → unload, verified via `/api/ps`.
-2. **Exact quant recorded** — the quant is part of the result, not metadata. Unknown quants are labeled `unknown`.
+1. **One model at a time** - load → suite → unload, verified via `/api/ps`.
+2. **Exact quant recorded** - the quant is part of the result, not metadata. Unknown quants are labeled `unknown`.
 3. Fixed generation budget (`num_predict`) so padding can't game averages.
 4. Honor the model's own Modelfile parameters unless the run is an explicit "optimized" variant (overrides recorded in notes).
-5. Failed tests get one retry, then are recorded as failures — they lower reliability points rather than vanish.
+5. Failed tests get one retry, then are recorded as failures - they lower reliability points rather than vanish.
 
 ## Why median + suite, not a single prompt
 
 Single-prompt numbers drift with prompt luck and hide degeneration. An 11-test
 suite across hallucination, instruction-following, loops, and routing (see
 [tests.md](tests.md)) exposes repetition loops and stalls that a single happy
-prompt would miss — and those failures are exactly what a buyer needs to know.
+prompt would miss - and those failures are exactly what a buyer needs to know.
 
 ## Classification vs. scoring
 
-- **Classification** (excellent…failed): fixed t/s bands — see [definitions.md](definitions.md).
-- **PS Points**: composite ranking score — see [scoring.md](scoring.md).
+- **Classification** (excellent…failed): fixed t/s bands - see [definitions.md](definitions.md).
+- **PS Points**: composite ranking score - see [scoring.md](scoring.md).
 
 The two are independent: a run is classified by how it *feels*, scored by how it *performs*.
 

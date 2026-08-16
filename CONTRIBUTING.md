@@ -1,4 +1,4 @@
-# CONTRIBUTING.md — Peasant Smith Contribution Guide
+# CONTRIBUTING.md - Peasant Smith Contribution Guide
 
 ## What is this project?
 
@@ -51,7 +51,7 @@ Every submission passes automated validation:
 - Numeric range sanity checks (negative tokens/sec flagged)
 - Memory value plausibility (VRAM > GPU total flagged for review)
 
-Results that pass validation are merged and appear in the database. Results with unusual but potentially valid values may be flagged for manual review — we do not automatically reject results from low-end hardware because the numbers look "low".
+Results that pass validation are merged and appear in the database. Results with unusual but potentially valid values may be flagged for manual review - we do not automatically reject results from low-end hardware because the numbers look "low".
 
 ## How optimization reports work
 
@@ -67,7 +67,7 @@ Every optimization report should answer:
 - **How much** improvement, measured against a baseline on the *same* hardware
 - **What you gave up** (quality, context length, stability tradeoffs)
 
-Optimization folklore with no numbers is not useful. We measure — then we decide.
+Optimization folklore with no numbers is not useful. We measure - then we decide.
 
 ## How hardware profiles are submitted
 
@@ -82,7 +82,7 @@ Include:
 
 ## Code of conduct
 
-By participating, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md). We're a technical community — but we treat each other like humans.
+By participating, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md). We're a technical community - but we treat each other like humans.
 
 ## Style guide for documentation
 
