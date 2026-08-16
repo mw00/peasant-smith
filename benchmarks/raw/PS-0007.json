@@ -52,7 +52,7 @@
  "result_classification": "excellent",
  "reproducibility": {
   "timestamp": "2026-08-09T18:09:06Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'.  Optimized sampling params (temp 0.1)."
+  "operator": "peasant-smith",
+  "notes": "Optimized sampling params (temp 0.1)."
  }
 }

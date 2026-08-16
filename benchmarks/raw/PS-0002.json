@@ -52,7 +52,7 @@
  "result_classification": "excellent",
  "reproducibility": {
   "timestamp": "2026-08-09T17:48:11Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Ollama import name; quantization not recorded at run time. Optimized sampling params (temp 0.5, top_p 0.85, top_k 40, min_p 0.05)."
+  "operator": "peasant-smith",
+  "notes": "Ollama import name; quantization not recorded at run time. Optimized sampling params (temp 0.5, top_p 0.85, top_k 40, min_p 0.05)."
  }
 }

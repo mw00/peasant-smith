@@ -52,7 +52,7 @@
  "result_classification": "excellent",
  "reproducibility": {
   "timestamp": "2026-08-10T16:31:09Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Custom Ollama Modelfile: num_ctx 98304, num_gpu 99. File size from ollama list. Generation speed held 18.6-19.2 t/s from 8k to 128k context: flat scaling, no degradation at long context."
+  "operator": "peasant-smith",
+  "notes": "Custom Ollama Modelfile: num_ctx 98304, num_gpu 99. File size from ollama list. Generation speed held 18.6-19.2 t/s from 8k to 128k context: flat scaling, no degradation at long context."
  }
 }

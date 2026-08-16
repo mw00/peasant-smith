@@ -52,7 +52,7 @@
  "result_classification": "good",
  "reproducibility": {
   "timestamp": "2026-08-10T01:55:40Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Dense. Fleet session: all models benchmarked sequentially in one run."
+  "operator": "peasant-smith",
+  "notes": "Dense. Fleet session: all models benchmarked sequentially in one run."
  }
 }

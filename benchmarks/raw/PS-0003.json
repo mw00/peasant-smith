@@ -52,7 +52,7 @@
  "result_classification": "usable",
  "reproducibility": {
   "timestamp": "2026-08-09T16:41:43Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Parameter count inferred from model name (S-2.1)."
+  "operator": "peasant-smith",
+  "notes": "Parameter count inferred from model name (S-2.1)."
  }
 }

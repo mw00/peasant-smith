@@ -52,7 +52,7 @@
  "result_classification": "usable",
  "reproducibility": {
   "timestamp": "2026-08-09T22:14:36Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. UD-IQ4_XS GGUF, shards merged with llama-gguf-split. Parameter count inferred from model name. IQ4_XS merged-shard build."
+  "operator": "peasant-smith",
+  "notes": "UD-IQ4_XS GGUF, shards merged with llama-gguf-split. Parameter count inferred from model name. IQ4_XS merged-shard build."
  }
 }

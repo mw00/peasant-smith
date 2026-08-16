@@ -52,7 +52,7 @@
  "result_classification": "usable",
  "reproducibility": {
   "timestamp": "2026-08-09T18:07:15Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Quantization not recorded at run time. Optimized sampling params."
+  "operator": "peasant-smith",
+  "notes": "Quantization not recorded at run time. Optimized sampling params."
  }
 }

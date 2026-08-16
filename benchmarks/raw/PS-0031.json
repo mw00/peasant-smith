@@ -52,7 +52,7 @@
  "result_classification": "excellent",
  "reproducibility": {
   "timestamp": "2026-08-10T16:31:09Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Custom Ollama Modelfile: num_ctx 98304, num_gpu 99. File size from ollama list. Needle retrieval at 60k and 120k tokens: both OK. Perfect recall at 120k context."
+  "operator": "peasant-smith",
+  "notes": "Custom Ollama Modelfile: num_ctx 98304, num_gpu 99. File size from ollama list. Needle retrieval at 60k and 120k tokens: both OK. Perfect recall at 120k context."
  }
 }

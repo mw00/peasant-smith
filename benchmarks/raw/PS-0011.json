@@ -52,7 +52,7 @@
  "result_classification": "usable",
  "reproducibility": {
   "timestamp": "2026-08-09T23:18:58Z",
-  "operator": "mw00",
-  "notes": "reasoning-v1 suite on system 'uranus'. Dense. ctx 65536. Companion optimized run aborted (empty output file) - see docs/tests.md failure modes."
+  "operator": "peasant-smith",
+  "notes": "Dense. ctx 65536. Companion optimized run aborted (empty output file) - see docs/tests.md failure modes."
  }
 }

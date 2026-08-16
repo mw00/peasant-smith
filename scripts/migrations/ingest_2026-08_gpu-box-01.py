@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""One-off migration: ingest the Aug 2026 Uranus benchmark results into
+"""One-off migration: ingest the Aug 2026 benchmark results into
 schema-valid raw JSON records under benchmarks/raw/.
 
 Source data: /home/manoel/benchmarks/*.jsonl (reasoning-v1 suite harness output).
-All runs executed on system 'uranus' (2x RTX 3060 12GB) between 2026-08-09 and 2026-08-11.
+All runs executed on system 'gpu-box-01' (2x RTX 3060 12GB) between 2026-08-09 and 2026-08-11.
 
 Re-run safely: overwrites benchmarks/raw/PS-*.json (idempotent).
 """
@@ -172,7 +172,7 @@ def build_record(bid, model_key, tests, software, run_date, ctx, protocol,
     rec = {
         "schema_version": SCHEMA_VERSION,
         "benchmark_id": bid,
-        "hardware_ref": "uranus",
+        "hardware_ref": "gpu-box-01",
         "protocol": protocol,
         "model": {
             "model_name": meta["name"],
@@ -202,8 +202,8 @@ def build_record(bid, model_key, tests, software, run_date, ctx, protocol,
         "result_classification": classify(median),
         "reproducibility": {
             "timestamp": run_date,
-            "operator": "mw00",
-            "notes": (f"reasoning-v1 suite on system 'uranus'. {meta['note']} "
+            "operator": "peasant-smith",
+            "notes": (f"{meta['note']} "
                       f"{extra_notes}").strip(),
         },
     }
