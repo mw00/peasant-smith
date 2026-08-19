@@ -21,7 +21,7 @@ This document records exactly what was tested when comparing **Qwen3.8-27B (Q5_K
 | Ollama | 0.32.8 |
 | Ollama env | `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_KV_CACHE_TYPE=q8_0`, `OLLAMA_MAX_LOADED_MODELS=2`, `OLLAMA_KEEP_ALIVE=15m` |
 
-All numbers in this report are from the three-3060 rig above. Do not cross-reference speeds against leaderboard rows recorded on a different-gpu-card rig — they are not comparable.
+All numbers in this report are from the three-3060 rig above. Do not cross-reference speeds against leaderboard rows recorded on a different-gpu-card rig — they are not comparable. Throughput was measured **one model loaded at a time, warm, batch size 1** (single-user decode, not batched inference); a server under batch load would report different effective t/s.
 
 ---
 
@@ -40,6 +40,8 @@ All numbers in this report are from the three-3060 rig above. Do not cross-refer
 
 Both run fully in VRAM (no CPU spill). Qwen3.8-27B ran its existing wired config (t=1.0, MTP draft 2); Ornith-1.5 ran its model-card-recommended sampling (t=0.6).
 
+> **Methodological caveat — quantization is not normalized.** The two models are at different quants: **Q5_K_M** (27B dense) vs **Q6_K** (35B MoE). A Q6 quant has a higher quality ceiling than Q5, so the task-quality comparison (esp. the dense-battery verdicts) reflects *architecture + quant together*, not architecture alone. The robustness/speed observations are the robust conclusions; treat the fine-grained quality gap as indicative, not a precise measure of architecture-only difference.
+
 ---
 
 ## 3. Method (why the results are comparable)
@@ -49,6 +51,8 @@ Both models were driven through the **same transport**: the agent's instructions
 - **Dense agentic battery — 9 scenarios.** Multi-turn native tool-calling loops exercising orchestration, loop-bounding, anti-hallucination, context retrieval, prompt-injection defense, step-order adherence, tool restraint, and error recovery. Verdicts are rule-based over the emitted tool-call sequence + final answer.
 - **Fleet hygiene battery — 11 tests.** Single-turn format/honesty/robustness checks (unfalsifiable inputs, invented-command refusal, strict format, refusal-without-cheerleading, exact-output obedience, counting, arithmetic convergence, JSON tool routing, intent interpretation, no-tool-when-unneeded). Verdicts are rule-based checks. A failed test gets **one retry**, then is scored as-is.
 - **One model at a time:** load → suite → unload → confirmed unloaded (Ollama `/api/ps` empty) before the next model loads.
+
+> **Measurement-discipline note (what the numbers can and cannot support):** each scenario/test was run **once** per model (with the single retry defined above, then scored as-is) — this report does **not** report mean ± std over repeated runs. The verdicts are **deterministic, rule-based** judgments (no LLM judge and no sampling variance), so a PASS/FAIL verdict is not a point estimate of stochastic quality; it is a check against a fixed rule. Throughput is the one stochastic quantity and is reported as a warm single run; treat ±a few t/s as noise and only same-context numbers as comparable. If you need high-confidence statistics on the marginal 8/9 vs 9/9 gap, run the battery several times and average — that is outside the scope of this report.
 
 Detailed per-test specs (steps, expected outcome, pass/fail definition) are in §8.
 
@@ -124,6 +128,7 @@ All speeds are token decode throughput as reported by Ollama (`eval_count / wall
 - **Robustness:** Ornith-1.5-35B-A3B **9/9** on the agentic battery and passes the prompt-injection defense that Qwen3.8-27B fails; both tie on the 11-test hygiene suite (modulo the two identical checker artifacts).
 - **Speed:** Ornith-1.5-35B-A3B is **~2× faster** (~46–49 t/s, up to ~62 t/s with full residency) than Qwen3.8-27B (~23–25 t/s).
 - **Footprint:** both fit in 36 GB; Ornith-1.5 uses ~30 GB at full residency, Qwen3.8-27B uses 21 GB. Both are one-large-model-at-a-time on this rig.
+- **Why it's fast — active-parameter efficiency:** Ornith-1.5 is a sparse MoE (35.5B total, **~3B active per token**), so each generated token touches ~3B params; Qwen3.8-27B is dense and touches all **27.3B** params per token. Roughly an order-of-magnitude fewer FLOPs per output token is the architectural reason it decodes ~2× faster despite a larger total footprint — the same reason it leaves ~6 GB headroom under the Qwen load. In cost terms: same one-time used-GPU purchase, ~2× throughput and better injection robustness for 9 GB more VRAM.
 
 **Conclusion:** a 35B-A3B sparse MoE at Q6_K is not only comparable in task quality to a 27B dense model at Q5 — it is materially **more robust to prompt injection** and **~2× faster** on this budget 3×3060 rig, at a modest VRAM cost (30 vs 21 GB). This supports the core Peasant Smith thesis that current sparse MoE is often a better buy on older/cheaper used GPUs than a heavier dense model at an aggressive quant.
 
