@@ -63,6 +63,7 @@ a dense 31B at similar quality would not fit at all.
 | Live rankings | [`LEADERBOARD.md`](LEADERBOARD.md) |
 | A tested system's full spec | [`data/systems.csv`](data/systems.csv) → [`hardware/systems/`](hardware/systems/) |
 | Run a benchmark yourself | [`scripts/benchmark/run_benchmark.py`](scripts/benchmark/run_benchmark.py) |
+| Model-vs-model deep dives | [`docs/qwen27b-vs-ornith-15.md`](docs/qwen27b-vs-ornith-15.md) (dense 27B Q5 vs 35B-A3B MoE Q6, per-test results + reproduction) |
 
 ## Project structure
 
