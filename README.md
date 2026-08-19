@@ -29,23 +29,34 @@ names its exact quant, and why runs with unknown quantization are labeled
 
 ## The numbers so far
 
-All August 2026 data below comes from one reference machine: two RTX 3060
+All August 2026 data below comes from a reference machine: two RTX 3060
 12 GB, a Xeon E5-1650 v4, and 128 GB of DDR4 UDIMM desktop RAM (quad-channel,
-X99 board).
-30 validated runs. Full table: [LEADERBOARD.md](LEADERBOARD.md).
+X99 board). A second rig — three RTX 3060 12 GB, same CPU, 123 GB RAM (see
+`uranus-3x3060` in [`data/systems.csv`](data/systems.csv)) — contributed the
+Ornith-1.5-35B-A3B and Qwen3.8-9B runs. **t/s on the 3-card rig are not
+directly comparable to the 2-card rows** (extra GPU compute), so those two are
+marked with `†`.
+
+32 validated runs. Full table: [LEADERBOARD.md](LEADERBOARD.md).
 
 | Model | Quant | Median t/s | Class | PS Points |
 |---|---|---:|---|---:|
 | LFM2.5-2.6B | unknown | 72.0 | excellent | 770 |
+| Ornith-1.5-35B-A3B (MoE, 3B active) † | Q6_K | 48.8 | excellent | 558 |
 | gemma4-26b-a4b (MoE, 4B active) | unknown | 44.1 | excellent | 491 |
 | Qwen35-Hermes | unknown | 40.9 | excellent | 459 |
 | Ornith-1.0-9B | Q6_K | 34.5 | excellent | 395 |
+| Qwen3.8-9B † | Q8_0 | 32.2 | excellent | 438 |
 | gemma-4-12b-it | UD-Q4_K_XL | 28.4 | excellent | 334 |
 | Ling-3.0-Flash (MoE) | IQ4_XXS | 21.2 | excellent | 282 |
 | Qwen3.8-27B | Q4_K_M | 18.9 @ 128k ctx | excellent | 269 |
 | Muse-Glimmer-30B | UD-Q4_K_XL | 18.4 | excellent | 234 |
 | gemma4-31b (dense) | unknown | 14.0 | good | 190 |
 | Qwen3.5-122B-A10B-MTP (MoE) | UD-IQ3_XXS | 8.1 | good | 131 |
+
+† = run on the separate 3× RTX 3060 rig (Uranus). Ornith-1.5-35B-A3B is also
+covered in the deep-dive below; Qwen3.8-9B (`empero-ai/Qwen3.8-9B`, a Qwen3.5-9B-architecture
+distillation of the 2.4T-A95B flagship) scored 10/11 on its fleet suite.
 
 The pattern is the whole thesis: **small efficient models and sparse MoE at
 Q4-class quants deliver interactive speeds on a few hundred dollars' worth of

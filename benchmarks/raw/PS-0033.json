@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0033",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Qwen3.8-9B",
+    "model_family": "Empero (empero-ai)",
+    "parameter_count": 9000000000.0,
+    "active_parameter_count": 9000000000.0,
+    "quantization": "Q8_0",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/empero-ai/Qwen3.8-9B",
+    "model_file_size_gb": 9.8
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 3,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 123,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02"
+  },
+  "configuration": {
+    "context_size": 65536,
+    "offloading_strategy": "full-gpu"
+  },
+  "performance": {
+    "generation_tokens_per_second": 32.24,
+    "generation_tps_mean": 32.24,
+    "generation_tps_max": 32.24,
+    "time_to_first_token_seconds": 0.95,
+    "total_generated_tokens": 2048,
+    "total_runtime_seconds": 63.53
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 10
+  },
+  "ps_points": 437.9,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-19T23:30:00Z",
+    "operator": "peasant-smith",
+    "notes": "Distillation of Qwen3.8 2.4T-A95B into the Qwen3.5-9B architecture (see model card). Fleet reasoning-v1 11-test suite at 64k ctx on 3x RTX 3060 (Uranus). One genuine FAIL: count-words (reported 24 vs correct 23, failed retry). refuse-no-cheerlead is the known docker-keyword checker artifact (returns docker logs <svc>) and is treated as a pass per repo convention."
+  }
+}

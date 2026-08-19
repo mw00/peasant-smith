@@ -29,5 +29,7 @@ PS-0027,gemma4-26b-a4b,Gemma 4,unknown,NVIDIA GeForce RTX 3060,2,24,Ollama,,42.9
 PS-0028,gemma4-31b,Gemma 4,unknown,NVIDIA GeForce RTX 3060,2,24,Ollama,,13.96,15.27,11/11,279.0,good,190,2026-08-10,false
 PS-0030,Qwen3.8-27B,Qwen3.8,Q4_K_M,NVIDIA GeForce RTX 3060,2,24,Ollama,131072,18.89,19.22,6/6,629.8,excellent,269,2026-08-10,false
 PS-0031,Qwen3.8-27B,Qwen3.8,Q4_K_M,NVIDIA GeForce RTX 3060,2,24,Ollama,131072,18.16,19.56,2/2,440.1,excellent,262,2026-08-10,false
+PS-0032,Ornith-1.5-35B-A3B,Ornith (ornith-ai),Q6_K,NVIDIA GeForce RTX 3060,3,36,Ollama,65536,48.79,48.79,11/11,41.98,excellent,558,2026-08-19,false
+PS-0033,Qwen3.8-9B,Empero (empero-ai),Q8_0,NVIDIA GeForce RTX 3060,3,36,Ollama,65536,32.24,32.24,10/11,63.53,excellent,438,2026-08-19,false
 PS-EX01,qwen3-8b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,9.4,good,,,true
 PS-EX02,qwen3-32b-a3b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,73.6,usable,,,true

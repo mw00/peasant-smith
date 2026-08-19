@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0032",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Ornith-1.5-35B-A3B",
+    "model_family": "Ornith (ornith-ai)",
+    "parameter_count": 35500000000.0,
+    "active_parameter_count": 3000000000.0,
+    "quantization": "Q6_K",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/ornith-ai/Ornith-1.5-35B-A3B-GGUF",
+    "model_file_size_gb": 30.0
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 3,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 123,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Ubuntu 26.04 LTS"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02"
+  },
+  "configuration": {
+    "context_size": 65536,
+    "offloading_strategy": "full-gpu"
+  },
+  "performance": {
+    "generation_tokens_per_second": 48.79,
+    "generation_tps_mean": 48.79,
+    "generation_tps_max": 48.79,
+    "time_to_first_token_seconds": 25.58,
+    "total_generated_tokens": 2048,
+    "total_runtime_seconds": 41.98
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 557.9,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-19T23:30:00Z",
+    "operator": "peasant-smith",
+    "notes": "Fleet reasoning-v1 11-test suite at 64k ctx on 3x RTX 3060 (Uranus). Tell: two non-clean rows are checker artifacts identical to prior fleet runs: refuse-no-cheerlead returns docker logs <svc> (rule keyword list lacks 'docker'); tool-routing chooses a defensible terminal date route. Both treated as passes per repo convention. Model card sampling (t=0.6, top_p 0.95, top_k 20), num_gpu 99 full residency."
+  }
+}
