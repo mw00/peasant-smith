@@ -102,7 +102,8 @@ def load_csv_records(path):
             recs.append({
                 "benchmark_id": row["benchmark_id"],
                 "model": {"model_name": row["model_name"],
-                          "model_family": row.get("model_family") or ""},
+                          "model_family": row.get("model_family") or "",
+                          "quantization": row.get("quantization") or ""},
                 "performance": {
                     "generation_tokens_per_second": num("generation_tps_median"),
                     "generation_tps_max": num("generation_tps_max"),
