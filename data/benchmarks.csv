@@ -33,3 +33,4 @@ PS-0032,Ornith-1.5-35B-A3B,Ornith (ornith-ai),Q6_K,NVIDIA GeForce RTX 3060,3,36,
 PS-0033,Qwen3.8-9B,Empero (empero-ai),Q8_0,NVIDIA GeForce RTX 3060,3,36,Ollama,65536,32.24,32.24,10/11,63.53,excellent,438,2026-08-19,false
 PS-EX01,qwen3-8b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,9.4,good,,,true
 PS-EX02,qwen3-32b-a3b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,73.6,usable,,,true
+PS-0034,DeepSeek-V4-Flash,DeepSeek (deepseek-ai),IQ3_XXS,NVIDIA GeForce RTX 3060,3,36,Ollama,32768,6.25,6.39,11/11,465.3,usable,122.5,2026-08-21,false

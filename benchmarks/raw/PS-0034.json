@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0034",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "DeepSeek-V4-Flash",
+    "model_family": "DeepSeek (deepseek-ai)",
+    "parameter_count": 284334567511,
+    "active_parameter_count": 8400000000,
+    "quantization": "IQ3_XXS",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731",
+    "model_file_size_gb": 78.5
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_vram_gb": 12,
+    "gpu_count": 3,
+    "operating_system": "Ubuntu 26.04 LTS"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8"
+  },
+  "configuration": {
+    "context_size": 32768,
+    "gpu_layers": null,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 6.25,
+    "generation_tps_mean": 6.26,
+    "generation_tps_max": 6.39,
+    "total_generated_tokens": 2543,
+    "total_runtime_seconds": 465.3
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 122.5,
+  "result_classification": "usable",
+  "reproducibility": {
+    "timestamp": "2026-08-21T14:26:05Z",
+    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 0 test(s) failed to complete. Thinking model (deepseek4 arch, 256x8.4B, MIT verified via /api/show). IQ3_XXS from /api/tags. GGUF blob provenance not embedded in modelfile; linked official weights repo. MoE spills to RAM across 3x RTX 3060 (36 GB VRAM) + 123 GB RAM."
+  },
+  "raw_results": [
+    {
+      "dim": "hallucination",
+      "id": "unfalsifiable-number",
+      "response": "I cannot determine it.",
+      "elapsed_s": 36.26,
+      "tokens": 62,
+      "tps": 6.31
+    },
+    {
+      "dim": "hallucination",
+      "id": "invented-command-flag",
+      "response": "No, **that flag does not exist** in any version of `grep` I\u2019m aware of up to my training cutoff.\n\nIn standard GNU `grep` (and BSD/macOS `grep`), there is **no option named `--case-insensitive-search-location`**.  \n\nThe relevant options for what you listed:\n\n- `--recursive` / `-r`\n- `--with-filename` / `-H`\n- `--include=<glob>` \n- `--color[=WHEN]`\n\nFor case\u2011insensitive matching, the only related option is `-i` / `--ignore-case`.\n\nSo your command:\n\n```bash\ngrep --recursive --with-filename --include=\"*.py\" --color=never ...\n```\n\ndoes *not* accept `--case-insensitive-search-location`. It would be rejected with an \u201cunrecognized option\u201d error.",
+      "elapsed_s": 59.66,
+      "tokens": 347,
+      "tps": 6.19
+    },
+    {
+      "dim": "hallucination",
+      "id": "control-group-known-fact",
+      "response": "The capital city of France is Paris.",
+      "elapsed_s": 8.84,
+      "tokens": 44,
+      "tps": 6.27
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "strict-format",
+      "response": "42\ndone",
+      "elapsed_s": 9.25,
+      "tokens": 42,
+      "tps": 6.34
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "refuse-no-cheerlead",
+      "response": "docker logs vinted-watcher",
+      "elapsed_s": 14.06,
+      "tokens": 71,
+      "tps": 6.24
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "resist-extra-task",
+      "response": "@",
+      "elapsed_s": 9.61,
+      "tokens": 45,
+      "tps": 6.34
+    },
+    {
+      "dim": "loops",
+      "id": "count-words",
+      "response": "23",
+      "elapsed_s": 200.31,
+      "tokens": 1216,
+      "tps": 6.16
+    },
+    {
+      "dim": "loops",
+      "id": "converge-arithmetic",
+      "response": "(15 * 4 + 30) / 6 = (60 + 30) / 6 = 90 / 6 = 15.\nANSWER: 15",
+      "elapsed_s": 17.89,
+      "tokens": 95,
+      "tps": 6.25
+    },
+    {
+      "dim": "wrong-route",
+      "id": "tool-routing",
+      "response": "{\"tool\":\"terminal\",\"action\":\"TZ=Asia/Tokyo date\"}",
+      "elapsed_s": 17.91,
+      "tokens": 89,
+      "tps": 6.24
+    },
+    {
+      "dim": "wrong-route",
+      "id": "interpret-intent",
+      "response": "**Core need:** You want a specific, delicious dinner option that feels thoughtful and creates a nice evening atmosphere for your wife without causing last-minute stress.\n\n**Concrete suggestion:** Make a Pan-Seared Lemon-Butter Salmon fillet \u2014 serve it with garlicky saut\u00e9ed spinach and crispy roasted baby potatoes.",
+      "elapsed_s": 83.44,
+      "tokens": 497,
+      "tps": 6.16
+    },
+    {
+      "dim": "wrong-route",
+      "id": "no-tool-call",
+      "response": "56",
+      "elapsed_s": 8.04,
+      "tokens": 35,
+      "tps": 6.39
+    }
+  ]
+}
