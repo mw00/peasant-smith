@@ -35,3 +35,4 @@ PS-EX01,qwen3-8b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,9.4,good,,,tr
 PS-EX02,qwen3-32b-a3b,,Q4_K_M,NVIDIA GeForce RTX 3060,,12,llama.cpp,,,,,73.6,usable,,,true
 PS-0034,DeepSeek-V4-Flash,DeepSeek (deepseek-ai),IQ3_XXS,NVIDIA GeForce RTX 3060,3,36,Ollama,32768,6.25,6.39,11/11,465.3,usable,122.5,2026-08-21,false
 PS-0035,GLM-4.5-Air (PS-IQ2_XXS-MTP),GLM-4.5 (zai-org),"IQ2_XXS-mix (IQ2_XXS+Q4_0+Q6_K+Q8_0, 3.29 BPW)",NVIDIA GeForce RTX 3060,3,36,Ollama,32768,9.2,9.55,11/11,548.6,good,152.0,2026-08-25,false
+PS-0036,Granite-4.2-30B,Granite-4.2 (ibm-granite),Q5_K_M,NVIDIA GeForce RTX 3060,3,36,Ollama,65536,15.13,15.34,11/11,435.6,excellent,221.3,2026-08-25,false

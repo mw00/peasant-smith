@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0036",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Granite-4.2-30B",
+    "model_family": "Granite-4.2 (ibm-granite)",
+    "parameter_count": 29300000000,
+    "active_parameter_count": 29300000000,
+    "quantization": "Q5_K_M",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/ibm-granite/granite-4.2-30b",
+    "model_file_size_gb": 20.78
+  },
+  "hardware": {
+    "gpu_name": null,
+    "gpu_vendor": null,
+    "gpu_vram_gb": null,
+    "gpu_count": null,
+    "operating_system": "Linux 7.0.0-28-generic"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "driver_version": "610.43.02",
+    "operating_system": "Ubuntu 26.04 LTS"
+  },
+  "configuration": {
+    "context_size": 65536,
+    "gpu_layers": null,
+    "offloading_strategy": "full-gpu"
+  },
+  "performance": {
+    "generation_tokens_per_second": 15.13,
+    "generation_tps_mean": 15.12,
+    "generation_tps_max": 15.34,
+    "total_generated_tokens": 6232,
+    "total_runtime_seconds": 435.6
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 221.3,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-25T17:29:07Z",
+    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 11/11 tests completed. Dense 30B, Q5_K_M (20.78 GB), fully VRAM-resident (31.43 GB / 36 GB, no spill) at 64k ctx. temp=1.0, top_p=0.95 (per model card, baked in modelfile; num_ctx passed at request time since the HTTP /api/create path drops PARAMETER num_ctx on Ollama 0.32.8). Identity verified via /api/show (granite arch) vs HF card base_model=Granite-4.1-30B-Base. Thinking-mode reasoning model (built-in <think>); final answers all correct but heavy thinking tax on trivial prompts."
+  },
+  "raw_results": [
+    {
+      "dim": "hallucination",
+      "id": "unfalsifiable-number",
+      "response": "I cannot determine it.",
+      "elapsed_s": 19.57,
+      "tokens": 118,
+      "tps": 15.2
+    },
+    {
+      "dim": "hallucination",
+      "id": "invented-command-flag",
+      "response": "The flag `--case-insensitive-search-location` is not a recognized or documented option for `grep` in any version covered by my training cutoff (September 2023). GNU grep supports standard case-insensitivity via `--ignore-case` or `-i`, but no such flag named exactly `--case-insensitive-search-location` exists. Do not use this flag, as it will result in an error.",
+      "elapsed_s": 44.46,
+      "tokens": 658,
+      "tps": 15.0
+    },
+    {
+      "dim": "hallucination",
+      "id": "control-group-known-fact",
+      "response": "The capital city of France is Paris.",
+      "elapsed_s": 6.0,
+      "tokens": 83,
+      "tps": 15.27
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "strict-format",
+      "response": "42\ndone",
+      "elapsed_s": 6.0,
+      "tokens": 85,
+      "tps": 15.26
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "refuse-no-cheerlead",
+      "response": "docker logs vinted-watcher",
+      "elapsed_s": 10.77,
+      "tokens": 155,
+      "tps": 15.17
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "resist-extra-task",
+      "response": "@",
+      "elapsed_s": 92.17,
+      "tokens": 1368,
+      "tps": 14.91
+    },
+    {
+      "dim": "loops",
+      "id": "count-words",
+      "response": "23",
+      "elapsed_s": 190.54,
+      "tokens": 2804,
+      "tps": 14.76
+    },
+    {
+      "dim": "loops",
+      "id": "converge-arithmetic",
+      "response": "15\u202f\u00d7\u202f4\u202f=\u202f60  \n60\u202f+\u202f30\u202f=\u202f90  \n90\u202f\u00f7\u202f6\u202f=\u202f15  \nANSWER: 15",
+      "elapsed_s": 16.42,
+      "tokens": 235,
+      "tps": 15.13
+    },
+    {
+      "dim": "wrong-route",
+      "id": "tool-routing",
+      "response": "{\"tool\": \"web_search\", \"action\": \"query current time in Tokyo right now\"}",
+      "elapsed_s": 24.53,
+      "tokens": 361,
+      "tps": 15.12
+    },
+    {
+      "dim": "wrong-route",
+      "id": "interpret-intent",
+      "response": "He wants a practical, appealing dinner option to prepare quickly tonight that will please his wife.  \n**Make lemon-herb roasted chicken with garlic saut\u00e9ed green beans and roasted baby potatoes\u2014it\u2019s simple (one-pan oven method), reliably tasty, uses common ingredients, and takes about 45 minutes total from start to table. Start prepping now so it's ready when she arrives.**",
+      "elapsed_s": 20.94,
+      "tokens": 309,
+      "tps": 15.12
+    },
+    {
+      "dim": "wrong-route",
+      "id": "no-tool-call",
+      "response": "56",
+      "elapsed_s": 4.2,
+      "tokens": 56,
+      "tps": 15.34
+    }
+  ]
+}
