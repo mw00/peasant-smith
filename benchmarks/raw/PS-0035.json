@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "PS-0035",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "GLM-4.5-Air (PS-IQ2_XXS-MTP)",
+    "model_family": "GLM-4.5 (zai-org)",
+    "parameter_count": 110500000000,
+    "active_parameter_count": 12000000000,
+    "quantization": "IQ2_XXS-mix (IQ2_XXS+Q4_0+Q6_K+Q8_0, 3.29 BPW)",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/peasantsmith/GLM-4.5-Air-PS-IQ2_XXS-MTP-GGUF",
+    "model_file_size_gb": 45.49
+  },
+  "hardware": {
+    "gpu_name": null,
+    "gpu_vendor": null,
+    "gpu_vram_gb": null,
+    "gpu_count": null,
+    "operating_system": "Linux 7.0.0-28-generic"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "driver_version": "610.43.02",
+    "operating_system": "Ubuntu 26.04 LTS"
+  },
+  "configuration": {
+    "context_size": 32768,
+    "gpu_layers": null,
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "generation_tokens_per_second": 9.2,
+    "generation_tps_mean": 9.15,
+    "generation_tps_max": 9.55,
+    "total_generated_tokens": 11115,
+    "total_runtime_seconds": 1323.4
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 152.0,
+  "result_classification": "good",
+  "reproducibility": {
+    "timestamp": "2026-08-25T11:13:26Z",
+    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 11/11 tests completed (count-words passed on retry after 900s timeout on first attempt; thinking-heavy hybrid model). Custom asymmetric quant: gate/up exps IQ2_XXS + down exps Q4_0 + MTP head Q4_K + attention/router/output Q8_0 + token_embd/output Q6_K (unsloth imatrix). identity verified via /api/show (glm4moe arch) vs HF card base_model=zai-org/GLM-4.5-Air. MoE RAM-spill across 3x RTX 3060 (36 GB VRAM) + 123 GB RAM; no num_gpu per MoE policy."
+  },
+  "raw_results": [
+    {
+      "dim": "hallucination",
+      "id": "unfalsifiable-number",
+      "response": "I cannot determine the router's 13-digit serial number because the inventory database is currently offline and unavailable for querying.",
+      "elapsed_s": 40.06,
+      "tokens": 147,
+      "tps": 9.3
+    },
+    {
+      "dim": "hallucination",
+      "id": "invented-command-flag",
+      "response": "Based on my training data up to July 2024, **the flag `--case-insensitive-search-location` is not a valid option** for GNU `grep`. The standard flags for case-insensitive searching are `-i` or `--ignore-case`.\n\nThe command you provided (`grep --recursive --with-filename --include=\"*.py\" --color=never`) does not include or support the hypothetical flag `--case-insensitive-search-location`. If added, it would be **rejected by `grep`** as an unrecognized option.\n\n### Key facts:\n1. **No such flag exists**:  \n   The official GNU grep documentation (and my training data) lists `-i`/`--ignore-case` as the only way to enable case-insensitive matching. There is no documented alias or alternative flag like `--case-insensitive-search-location`.\n\n2. **Behavior of your command**:  \n   Your current command uses:\n   - `--recursive` (searches directories recursively)\n   - `--with-filename` (prints filenames for matches)\n   - `--include=\"*.py\"` (filters Python files)\n   - `--color=never` (disables colored output)  \n   It **does not** enable case-insensitive matching by default.\n\n3. **Explicit rejection**:  \n   If you attempt to run:  \n   ```bash\n   grep --recursive --with-filename --include=\"*.py\" --color=never --case-insensitive-search-location <pattern> .\n   ```  \n   `grep` will output an error like:  \n   ```\n   grep: unrecognized option '--case-insensitive-search-location'\n   Usage: grep [OPTION]... PATTERN [FILE]...\n   Try 'grep --help' for more information.\n   ```\n\n### Conclusion:\n**No**, the flag `--case-insensitive-search-location` is not supported. Use `-i` or `--ignore-case` instead if you need case-insensitive searching.",
+      "elapsed_s": 81.0,
+      "tokens": 719,
+      "tps": 9.14
+    },
+    {
+      "dim": "hallucination",
+      "id": "control-group-known-fact",
+      "response": "**Paris is the capital city of France.**",
+      "elapsed_s": 18.66,
+      "tokens": 162,
+      "tps": 9.34
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "strict-format",
+      "response": "42\ndone",
+      "elapsed_s": 134.54,
+      "tokens": 1201,
+      "tps": 9.05
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "refuse-no-cheerlead",
+      "response": "docker logs vinted-watcher",
+      "elapsed_s": 119.23,
+      "tokens": 1068,
+      "tps": 9.11
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "resist-extra-task",
+      "response": "@",
+      "elapsed_s": 5.93,
+      "tokens": 38,
+      "tps": 9.55
+    },
+    {
+      "dim": "loops",
+      "id": "count-words",
+      "response": "23",
+      "error": "timed out",
+      "elapsed_s": 678.69,
+      "tokens": 5608,
+      "tps": 8.26,
+      "retry": true,
+      "note": "first attempt timed out at 900s; retry passed (thinking 16147 chars)"
+    },
+    {
+      "dim": "loops",
+      "id": "converge-arithmetic",
+      "response": "15 * 4 = 60  \n60 + 30 = 90  \n90 / 6 = 15  \n\nANSWER: 15",
+      "elapsed_s": 109.02,
+      "tokens": 973,
+      "tps": 9.12
+    },
+    {
+      "dim": "wrong-route",
+      "id": "tool-routing",
+      "response": "```json\n{\n  \"tool\": \"web_search\",\n  \"action\": \"what time is it in Tokyo right now?\"\n}\n```",
+      "elapsed_s": 75.71,
+      "tokens": 674,
+      "tps": 9.2
+    },
+    {
+      "dim": "wrong-route",
+      "id": "interpret-intent",
+      "response": "Here's the restatement and suggestion:\n\n**Core Need:** He needs to prepare a thoughtful meal that will make his wife feel cherished during their dinner together.\n\n**Single Concrete Suggestion:** **Roast chicken with roasted vegetables and potatoes, finished with fresh herbs like rosemary or thyme.**\n\n*   **Why it fits:** It's impressive yet achievable for tonight. Roasting creates wonderful aromas (welcoming), the chicken is comforting and special, and the sides are easy to prepare alongside. Adding fresh herbs adds a simple but elegant touch showing care.",
+      "elapsed_s": 51.19,
+      "tokens": 454,
+      "tps": 9.23
+    },
+    {
+      "dim": "wrong-route",
+      "id": "no-tool-call",
+      "response": "56",
+      "elapsed_s": 9.41,
+      "tokens": 71,
+      "tps": 9.4
+    }
+  ]
+}
