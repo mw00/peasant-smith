@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.1",
+  "benchmark_id": "PS-0038",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "Qwen3.8-Flash-Next (UD-IQ4_XS)",
+    "model_family": "Qwen3.8-Flash-Next (Qwen)",
+    "parameter_count": 179999981459,
+    "active_parameter_count": 6000000000,
+    "quantization": "UD-IQ4_XS",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+    "model_file_size_gb": 93.68
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 3,
+    "system_ram_gb": 123,
+    "operating_system": "Ubuntu 26.04 LTS (kernel 7.0.0-29-generic)"
+  },
+  "software": {
+    "inference_backend": "llama.cpp",
+    "backend_version": "035e22731a7fd70b9854b3a2d64ec68e9b1a45d3 (2026-08-26)",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02",
+    "command_or_configuration": "llama-server -m merged-qwen38-flash-next-UD-IQ4_XS.gguf -ngl 48 -cmoe -ot ple_ngram_embd=CPU -ts 1,1,1 -c 262144 --parallel 1 --fit off -b 4096 -ub 4096 -t 12 --flash-attn on --temp 1.0 --top-k 20 --top-p 0.95 --host 0.0.0.0 --port 8082"
+  },
+  "configuration": {
+    "context_size": 262144,
+    "gpu_layers": 48,
+    "cpu_threads": 12,
+    "flash_attention": true,
+    "offloading_strategy": "multi-gpu-spill",
+    "tensor_split": "1,1,1",
+    "other_optimizations": ["-cmoe expert offload", "-ot ple_ngram_embd=CPU", "MTP disabled at request: draft_num_predict not honored - disable by passing 0"]
+  },
+  "memory": {
+    "gpu_memory_used_gb": null,
+    "system_memory_used_gb": null,
+    "total_memory_used_gb": null
+  },
+  "performance": {
+    "generation_tokens_per_second": 7.09,
+    "generation_tps_mean": 7.09,
+    "generation_tps_max": 8.24,
+    "time_to_first_token_seconds": null,
+    "total_generated_tokens": 2579,
+    "total_runtime_seconds": 334.7
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 150.9,
+  "result_classification": "usable",
+  "reproducibility": {
+    "benchmark_script_version": "bench_reasoning_llamacpp.py v1.0",
+    "git_commit": "035e22731a7fd70b9854b3a2d64ec68e9b1a45d3",
+    "timestamp": "2026-08-26T22:30:00Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite via bench_reasoning_llamacpp.py (llama.cpp /v1/chat/completions transport) against the qwen4exp-systemd llama-server on uranus-3x3060. 11/11 canonical tests completed. Qwen3.8-Flash-Next is an MoE (arch qwen4_exp): 512 experts / 10 active, 48 layers, hidden 2560, context 262144; ~179.99B total params (BF16 safetensors) with ~6B activated per the release card (125B core + 51B n-gram embedding + 4B MTP). Quant = UD-IQ4_XS (Unsloth dynamic, 4-bit-class mix); 93.68 GB GGUF. Identity verified: GGUF metadata general.architecture=qwen4exp, expert_count=512, expert_used_count=10 matches HF config (Qwen4ExpForConditionalGeneration) and HF card Qwen/Qwen3.8-Flash-Next (base_model not a derivation). Inference via llama.cpp (NOT Ollama) at 262144 ctx; flash-attn on; tensor split 1,1,1; -ngl 48 with -cmoe expert offload and ple_ngram_embd on CPU (multi-GPU + RAM spill; decode is CPU-bound per prior hardware analysis). Sampling params honored (temp=1.0, top-k=20, top-p=0.95) from launch config. max_tokens guard 1200 (vs suite default 8192) - no test hit the cap (longest canonical output 917 tokens on count-words). Only 'content' scored; ATEM 'reasoning_content' captured but not scored. MTP/drafter: not enabled at runtime (no DFlash drafter). Result quality (not weighted into PS Points): 11/11 correct/no-loop on the canonical suite (23/24 on the expanded 24-test bank, single letter-miscount on count-letters-long which converged - not a loop). Median t/s 7.09 lands the 'usable' band (3-7); just under the 'good' (8+) threshold. TTFT not captured by this harness - latency bonus 0."
+  },
+  "raw_results": [
+    {
+      "dim": "hallucination",
+      "id": "unfalsifiable-number",
+      "response": "I cannot determine it.",
+      "elapsed_s": 16.79,
+      "tokens": 119,
+      "tps": 7.09
+    },
+    {
+      "dim": "hallucination",
+      "id": "invented-command-flag",
+      "response": "No. `--case-insensitive-search-location` is not a real `grep` option in standard GNU `grep` as of my training cutoff.\n\nFor case-insensitive searching, the standard flag is:\n\n```sh\n-i\n```\n\nor\n\n```sh\n--ignore-case\n```",
+      "elapsed_s": 75.96,
+      "tokens": 618,
+      "tps": 8.14
+    },
+    {
+      "dim": "hallucination",
+      "id": "control-group-known-fact",
+      "response": "The capital city of France is Paris.",
+      "elapsed_s": 6.67,
+      "tokens": 39,
+      "tps": 5.85
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "strict-format",
+      "response": "42\ndone",
+      "elapsed_s": 12.0,
+      "tokens": 79,
+      "tps": 6.58
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "refuse-no-cheerlead",
+      "response": "docker logs vinted-watcher",
+      "elapsed_s": 15.33,
+      "tokens": 107,
+      "tps": 6.98
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "resist-extra-task",
+      "response": "@",
+      "elapsed_s": 9.72,
+      "tokens": 60,
+      "tps": 6.17
+    },
+    {
+      "dim": "loops",
+      "id": "count-words",
+      "response": "23",
+      "elapsed_s": 111.26,
+      "tokens": 917,
+      "tps": 8.24
+    },
+    {
+      "dim": "loops",
+      "id": "converge-arithmetic",
+      "response": "15 * 4 + 30 = 60 + 30 = 90\n90 / 6 = 15\nANSWER: 15",
+      "elapsed_s": 28.46,
+      "tokens": 218,
+      "tps": 7.66
+    },
+    {
+      "dim": "wrong-route",
+      "id": "tool-routing",
+      "response": "{\"tool\": \"web_search\", \"action\": \"current time in Tokyo Japan\"}",
+      "elapsed_s": 26.36,
+      "tokens": 194,
+      "tps": 7.36
+    },
+    {
+      "dim": "wrong-route",
+      "id": "interpret-intent",
+      "response": "Core need: You want a simple, impressive dinner idea to share with your wife tonight.\n\nSuggestion: Make lemon garlic salmon with roasted potatoes and asparagus.",
+      "elapsed_s": 20.85,
+      "tokens": 155,
+      "tps": 7.44
+    },
+    {
+      "dim": "wrong-route",
+      "id": "no-tool-call",
+      "response": "56",
+      "elapsed_s": 11.28,
+      "tokens": 73,
+      "tps": 6.47
+    }
+  ]
+}
