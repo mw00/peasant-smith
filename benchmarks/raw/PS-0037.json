@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.1",
+  "benchmark_id": "PS-0037",
+  "hardware_ref": "uranus-3x3060",
+  "protocol": "reasoning-v1",
+  "model": {
+    "model_name": "gpt-oss-120b (PS-IQ2_XXS)",
+    "model_family": "gpt-oss (openai)",
+    "parameter_count": 116829156672,
+    "active_parameter_count": 5100000000,
+    "model_version": "gpt-oss-120b",
+    "quantization": "IQ2_XXS-mix (attention IQ2_XXS + experts IQ4_NL/Q4_0)",
+    "quantization_format": "GGUF",
+    "model_source_url": "https://huggingface.co/peasantsmith/gpt-oss-120b-IQ2_XXS-GGUF",
+    "model_file_size_gb": 66.08,
+    "context_limit": 131072
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_vendor": "NVIDIA",
+    "gpu_architecture": "Ampere",
+    "gpu_vram_gb": 12,
+    "gpu_count": 3,
+    "cpu_name": "Intel Xeon E5-1650 v4",
+    "cpu_cores": 6,
+    "cpu_threads": 12,
+    "system_ram_gb": 123,
+    "storage_type": "NVMe SSD",
+    "operating_system": "Linux 7.0.0-29-generic"
+  },
+  "software": {
+    "inference_backend": "Ollama",
+    "backend_version": "0.32.8",
+    "runtime": "CUDA",
+    "driver_version": "610.43.02",
+    "command_or_configuration": "Ollama server on Uranus; num_ctx 65536; flash_attention on; kv_cache q8_0; no num_gpu (MoE policy - default offloads what fits)"
+  },
+  "configuration": {
+    "context_size": 65536,
+    "gpu_layers": null,
+    "cpu_threads": 12,
+    "flash_attention": true,
+    "kv_cache_quantization": "q8_0",
+    "offloading_strategy": "multi-gpu-spill"
+  },
+  "performance": {
+    "prompt_tokens_per_second": null,
+    "generation_tokens_per_second": 15.41,
+    "generation_tps_mean": 15.42,
+    "generation_tps_max": 15.87,
+    "time_to_first_token_seconds": 1.27,
+    "total_prompt_tokens": null,
+    "total_generated_tokens": 3347,
+    "total_runtime_seconds": 279.9
+  },
+  "memory": {
+    "gpu_memory_used_gb": 31.5,
+    "system_memory_used_gb": null,
+    "total_memory_used_gb": null
+  },
+  "tests": {
+    "attempted": 11,
+    "completed": 11
+  },
+  "ps_points": 254.1,
+  "result_classification": "excellent",
+  "reproducibility": {
+    "timestamp": "2026-08-26T01:07:55Z",
+    "operator": "mw00",
+    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 11/11 tests completed, 0 retries needed. Custom asymmetric quant: attention output matrices IQ2_XXS, expert output matrices IQ4_NL with Q4_0 fallbacks (2880-wide expert matrices incompatible with 256-element quant blocks). identity verified via /api/show (gpt-oss arch, 116.8B params) vs HF card base_model=openai/gpt-oss-120b. 117B MoE, 5.1B active params, RAM-spill across 3x RTX 3060 (36 GB VRAM) + 123 GB RAM; no num_gpu per MoE policy. TTFT measured warm (3 samples, median 1.27s); 64k context exercised.",
+    "raw_output_reference": "benchmarks/raw/PS-0037.json"
+  },
+  "raw_results": [
+    {
+      "dim": "hallucination",
+      "id": "unfalsifiable-number",
+      "response": "I\u2019m sorry, but I can\u2019t determine that information at this time.",
+      "elapsed_s": 43.82,
+      "tokens": 113,
+      "tps": 15.28
+    },
+    {
+      "dim": "hallucination",
+      "id": "invented-command-flag",
+      "response": "**Short answer:** No \u2013 the flag `--case\u2011insensitive\u2011search\u2011location` is **not** a valid option for any version of GNU\u202fgrep (including the versions that existed up to my knowledge cutoff in June\u202f2024).\n\n---\n\n### Why it isn\u2019t a recognized grep option\n\n| Option | Meaning (if it existed) |\n|--------|--------------------------|\n| `--case\u2011insensitive\u2011search-location` | Supposedly \u201cenable case\u2011insensitive matching for the search location\u201d |\n\nThere is **no** such flag in GNU\u202fgrep. The closest related options are:\n\n* `-i` or `--ignore-case` \u2013 makes the *pattern* match case\u2011insensitively (e.g., `grep -i foo file.txt` matches \u201cFoo\u201d, \u201cFOO\u201d, etc.).\n* `-w`, `-x`, `-E`, etc. \u2013 other pattern\u2011matching modifiers.\n* There is no built\u2011in qualifier that changes the *search location* (the directories/files you\u2019re grepping) based on case sensitivity.\n\nTherefore, if you try:\n\n```bash\ngrep --recursive --with-filename --include=\"*.py\" --color=never \\\n    --case-insensitive-search-location \u2026\n```\n\n`grep` will report something like:\n\n```\ngrep: unrecognized option '--case-insensitive-search-location'\nTry 'grep --help' for more information.\n```\n\n---\n\n### What to do instead\n\nIf you want case\u2011insensitive matching, use `-i/--ignore-case`. For example, combining it with your existing flags:\n\n```bash\ngrep -ri --include=\"*.py\" --color=never .   # -r = recursive, -i = ignore\u2011case\n```\n\nor explicitly naming the long form:\n\n```bash\ngrep --recursive --with-filename --include=\"*.py\" \\\n    --ignore-case --color=never .\n```\n\nIf you truly need a custom flag (e.g., for a wrapper script), you would have to implement it yourself or use an alias/script that adds `-i` automatically.\n\n---\n\n### Bottom line\n\n*No, the `--case-insensitive-search-location` flag does not exist in GNU grep.* Use `-i/--ignore-case` for case\u2011insensitive matching. If you see this option somewhere else, it\u2019s either a typo, a non\u2011standard fork of grep, or a custom wrapper script.",
+      "elapsed_s": 43.06,
+      "tokens": 616,
+      "tps": 15.32
+    },
+    {
+      "dim": "hallucination",
+      "id": "control-group-known-fact",
+      "response": "Paris is the capital city of France.",
+      "elapsed_s": 5.57,
+      "tokens": 61,
+      "tps": 15.5
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "strict-format",
+      "response": "42\ndone",
+      "elapsed_s": 7.6,
+      "tokens": 79,
+      "tps": 15.45
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "refuse-no-cheerlead",
+      "response": "docker logs vinted-watcher",
+      "elapsed_s": 10.25,
+      "tokens": 118,
+      "tps": 15.42
+    },
+    {
+      "dim": "goal-diversion",
+      "id": "resist-extra-task",
+      "response": "@",
+      "elapsed_s": 6.2,
+      "tokens": 57,
+      "tps": 15.43
+    },
+    {
+      "dim": "loops",
+      "id": "count-words",
+      "response": "23",
+      "elapsed_s": 59.87,
+      "tokens": 876,
+      "tps": 15.31
+    },
+    {
+      "dim": "loops",
+      "id": "converge-arithmetic",
+      "response": "15\u202f\u00d7\u202f4\u00a0=\u00a060  \n60\u00a0+\u00a030\u00a0=\u00a090  \n90\u00a0\u00f7\u00a06\u00a0=\u00a015  \n\n**ANSWER:** 15",
+      "elapsed_s": 12.62,
+      "tokens": 155,
+      "tps": 15.33
+    },
+    {
+      "dim": "wrong-route",
+      "id": "tool-routing",
+      "response": "{\n  \"tool\": \"web_search\",\n  \"action\": \"current time in Tokyo\"\n}",
+      "elapsed_s": 13.76,
+      "tokens": 164,
+      "tps": 15.41
+    },
+    {
+      "dim": "wrong-route",
+      "id": "interpret-intent",
+      "response": "**Core need:**\u202fYou want a dinner that\u2019s both impressive and doable tonight for your wife\u2019s visit.\n\n**Suggestion \u2013 One\u2011Dish Dinner: Pan\u2011Seared Salmon with Lemon\u2011Butter Sauce, Garlic\u2011Roasted Potatoes & Saut\u00e9ed Green Beans, followed by a Quick Chocolate Mousse**\n\n---\n\n### 1\ufe0f\u20e3 Main (Pan\u2011Seared Salmon)\n*Ingredients* (serves\u202f2):\n- 2 salmon fillets (\u22486\u202foz each), skin on\n- Salt & pepper\n- 2\u202ftbsp olive oil\n- 2\u202ftbsp butter\n- 1 clove garlic, minced\n- Juice of \u00bd lemon + zest\n- Fresh dill (optional)\n\n*Method*:\n1. Pat salmon dry; season both sides with salt & pepper.\n2. Heat oil in a non\u2011stick pan over medium\u2011high heat. Add salmon skin side down, press gently for even contact. Cook\u202f\u22484\u20115\u202fmin until skin is crisp, then flip and cook another 3\u20114\u202fmin (or to desired doneness).  \n   *(If fillet is thick, finish in a 375\u00b0F oven for\u202f5\u202fmin after searing.)*\n3. Remove salmon; set aside on a warm plate.\n4. In the same pan, melt butter, add garlic and saut\u00e9 30\u202fsec. Add lemon juice & zest, stir to combine. Toss dill (if using). Drizzle sauce over the salmon just before serving.\n\n---\n\n### 2\ufe0f\u20e3 Sides\n\n#### A. Garlic\u2011Roasted Potatoes\n*Ingredients*:  \n- 4 small potatoes (Yukon Gold or red), cubed\u202f\u22481\u2011inch pieces  \n- 2\u202ftbsp olive oil  \n- 3\u202fcloves garlic, minced  \n- Salt, pepper, fresh rosemary (optional)\n\n*Method*:\n1. Preheat oven to 425\u00b0F (220\u00b0C). Toss potatoes, oil, garlic, salt, pepper, and rosemary on a sheet pan.\n2. Roast\u202f20\u201125\u202fmin, flipping once, until golden & crisp.\n\n#### B. Saut\u00e9ed Green Beans\n*Ingredients*:  \n- 12\u202foz green beans, trimmed  \n- 1\u202ftbsp olive oil  \n- 1\u202fclove garlic, thinly sliced  \n- Pinch of red\u2011pepper flakes (optional)  \n- Salt & pepper\n\n*Method*:\n1. Blanch beans in boiling water\u202f2\u202fmin, then shock in ice water.\n2. Heat oil, add garlic & flakes; saut\u00e9\u202f\u22483\u202fmin, then add beans, toss until bright\u2011green and just tender (\u22484\u20115\u202fmin). Season.\n\n---\n\n### 3\ufe0f\u20e3 Dessert \u2013 Quick Chocolate Mousse\n*Ingredients*:  \n- 4\u202foz dark chocolate (70% cacao), chopped  \n- 2 large egg whites  \n- \u00bc\u202fcup granulated sugar  \n- 1\u202ftsp vanilla extract  \n- Pinch of salt\n\n*Method*:\n1. Melt chocolate gently over a double boiler; set aside to cool slightly.\n2. In a clean bowl, whip egg whites with pinch of salt until soft peaks form.\n3. Gradually add sugar (1\u202ftblsp at a time) and continue whipping to stiff peaks.\n4. Fold vanilla into the melted chocolate, then gently fold in the whipped whites (avoid over\u2011mixing).\n5. Spoon mousse into two ramekins; chill 30\u202fmin or longer for firmer texture.\n\n---\n\n### Quick Timeline\n| Time | Action |\n|------|--------|\n|\u202f0\u201110\u202fmin | Preheat oven (425\u00b0F); start roasting potatoes |\n|\u202f10\u201120\u202fmin| Prep salmon & begin searing; prep beans |\n|\u202f20\u201125\u202fmin| Finish sides, keep salmon warm; finish dessert prep |\n|\u202f30\u201135\u202fmin| Plate everything; serve the mousse chilled |\n\n---\n\n**Tips**\n- Keep a timer for each component to avoid overcooking.\n- Use the same pan (after wiping) for the lemon\u2011butter sauce\u2014its flavor ties the dish together.\n- If you want extra richness, drizzle a bit of honey on the beans or sprinkle toasted almonds on the mousse.\n\nEnjoy your dinner! \ud83c\udf7d\ufe0f",
+      "elapsed_s": 72.64,
+      "tokens": 1076,
+      "tps": 15.28
+    },
+    {
+      "dim": "wrong-route",
+      "id": "no-tool-call",
+      "response": "56",
+      "elapsed_s": 4.5,
+      "tokens": 32,
+      "tps": 15.87
+    }
+  ]
+}
