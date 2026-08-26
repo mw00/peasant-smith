@@ -62,12 +62,12 @@
     "attempted": 11,
     "completed": 11
   },
-  "ps_points": 254.1,
+  "ps_points": 224.0,
   "result_classification": "excellent",
   "reproducibility": {
     "timestamp": "2026-08-26T01:07:55Z",
     "operator": "mw00",
-    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 11/11 tests completed, 0 retries needed. Custom asymmetric quant: attention output matrices IQ2_XXS, expert output matrices IQ4_NL with Q4_0 fallbacks (2880-wide expert matrices incompatible with 256-element quant blocks). identity verified via /api/show (gpt-oss arch, 116.8B params) vs HF card base_model=openai/gpt-oss-120b. 117B MoE, 5.1B active params, RAM-spill across 3x RTX 3060 (36 GB VRAM) + 123 GB RAM; no num_gpu per MoE policy. TTFT measured warm (3 samples, median 1.27s); 64k context exercised.",
+    "notes": "reasoning-v1 suite via Peasant Smith runner v1.0; 11/11 tests completed, 0 retries needed. Custom asymmetric quant: attention output matrices IQ2_XXS, expert output matrices IQ4_NL with Q4_0 fallbacks (2880-wide expert matrices incompatible with 256-element quant blocks). identity verified via /api/show (gpt-oss arch, 116.8B params) vs HF card base_model=openai/gpt-oss-120b. 117B MoE, 5.1B active params, RAM-spill across 3x RTX 3060 (36 GB VRAM) + 123 GB RAM; no num_gpu per MoE policy. TTFT measured warm (3 samples, median 1.27s); 64k context exercised. [Note: TTFT 1.27s captured but NOT scored \u2014 repo leaderboard/CI scores from data/benchmarks.csv which has no TTFT column, so latency bonus is excluded from PS Points. See docs/scoring.md.]",
     "raw_output_reference": "benchmarks/raw/PS-0037.json"
   },
   "raw_results": [

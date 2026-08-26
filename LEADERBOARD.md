@@ -15,10 +15,10 @@ Scoring formula: [docs/scoring.md](docs/scoring.md) · Protocols: [docs/tests.md
 | 5 | PS-0010 | gemma4-26b-a4b | unknown | 44.09 | 11/11 | excellent | **491** |
 | 6 | PS-0027 | gemma4-26b-a4b | unknown | 42.99 | 11/11 | excellent | **480** |
 | 7 | PS-0001 | Qwen35-Hermes | unknown | 40.9 | 11/11 | excellent | **459** |
-| 8 | PS-0033 | Qwen3.8-9B | Q8_0 | 32.24 | 10/11 | excellent | **438** |
-| 9 | PS-0002 | Qwen35-Hermes | unknown | 38.09 | 11/11 | excellent | **431** |
-| 10 | PS-0023 | Qwen35-Hermes | unknown | 37.96 | 11/11 | excellent | **430** |
-| 11 | PS-0014 | Ornith-1.0-9B | Q6_K | 34.5 | 11/11 | excellent | **395** |
+| 8 | PS-0002 | Qwen35-Hermes | unknown | 38.09 | 11/11 | excellent | **431** |
+| 9 | PS-0023 | Qwen35-Hermes | unknown | 37.96 | 11/11 | excellent | **430** |
+| 10 | PS-0014 | Ornith-1.0-9B | Q6_K | 34.5 | 11/11 | excellent | **395** |
+| 11 | PS-0033 | Qwen3.8-9B | Q8_0 | 32.24 | 10/11 | excellent | **388** |
 | 12 | PS-0015 | Ornith-1.0-9B | Q6_K | 33.5 | 11/11 | excellent | **385** |
 | 13 | PS-0013 | gemma-4-12b-it | UD-Q4_K_XL | 28.38 | 11/11 | excellent | **334** |
 | 14 | PS-0012 | gemma-4-12b-it | UD-Q4_K_XL | 27.7 | 11/11 | excellent | **327** |
@@ -26,8 +26,8 @@ Scoring formula: [docs/scoring.md](docs/scoring.md) · Protocols: [docs/tests.md
 | 16 | PS-0017 | Ling-3.0-Flash-AD | IQ4_XXS | 20.22 | 11/11 | excellent | **272** |
 | 17 | PS-0030 | Qwen3.8-27B | Q4_K_M | 18.89 | 6/6 | excellent | **269** |
 | 18 | PS-0031 | Qwen3.8-27B | Q4_K_M | 18.16 | 2/2 | excellent | **262** |
-| 19 | PS-0037 | gpt-oss-120b (PS-IQ2_XXS) | IQ2_XXS-mix (attention IQ2_XXS + experts IQ4_NL/Q4_0) | 15.41 | 11/11 | excellent | **254** |
-| 20 | PS-0018 | Muse-Glimmer-30B | UD-Q4_K_XL | 18.35 | 11/11 | excellent | **234** |
+| 19 | PS-0018 | Muse-Glimmer-30B | UD-Q4_K_XL | 18.35 | 11/11 | excellent | **234** |
+| 20 | PS-0037 | gpt-oss-120b (PS-IQ2_XXS) | IQ2_XXS-mix (attention IQ2_XXS + experts IQ4_NL/Q4_0) | 15.41 | 11/11 | excellent | **224** |
 | 21 | PS-0036 | Granite-4.2-30B | Q5_K_M | 15.13 | 11/11 | excellent | **221** |
 | 22 | PS-0026 | Qwen3.8-27B | unknown | 17.06 | 11/11 | excellent | **221** |
 | 23 | PS-0008 | Qwen3.8-27B | unknown | 17.04 | 11/11 | excellent | **220** |
@@ -53,13 +53,13 @@ Scoring formula: [docs/scoring.md](docs/scoring.md) · Protocols: [docs/tests.md
 | Ornith-1.5-35B-A3B | PS-0032 | **558** | 48.79 |
 | gemma4-26b-a4b | PS-0010 | **491** | 44.09 |
 | Qwen35-Hermes | PS-0001 | **459** | 40.9 |
-| Qwen3.8-9B | PS-0033 | **438** | 32.24 |
 | Ornith-1.0-9B | PS-0014 | **395** | 34.5 |
+| Qwen3.8-9B | PS-0033 | **388** | 32.24 |
 | gemma-4-12b-it | PS-0013 | **334** | 28.38 |
 | Ling-3.0-Flash-AD | PS-0016 | **282** | 21.24 |
 | Qwen3.8-27B | PS-0030 | **269** | 18.89 |
-| gpt-oss-120b (PS-IQ2_XXS) | PS-0037 | **254** | 15.41 |
 | Muse-Glimmer-30B | PS-0018 | **234** | 18.35 |
+| gpt-oss-120b (PS-IQ2_XXS) | PS-0037 | **224** | 15.41 |
 | Granite-4.2-30B | PS-0036 | **221** | 15.13 |
 | gemma4-31b | PS-0028 | **190** | 13.96 |
 | GLM-4.5-Air (PS-IQ2_XXS-MTP) | PS-0035 | **152** | 9.2 |
