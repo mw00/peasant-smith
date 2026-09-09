@@ -1,18 +1,16 @@
 import { useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
 import { AXES } from '../config/axes.js'
+import { QUADRANTS } from '../config/presets.js'
 
-// Renders a branded, social-ready share card for the user's result and lets
-// them download it as a PNG, copy it to the clipboard, or share to X.
+const X = 1024 // square export size
+
+// Renders a branded, social-ready share card for the user's result.
 //
-// Display: the card is FULLY RESPONSIVE (auto height) so it always shows
-// completely on any screen width — no more clipped/overflowing content on
-// mobile. It stacks vertically on small screens and goes two-column wide on
-// larger ones.
-//
-// Export: a dedicated off-screen 1280x720 (16:9) node is captured, so the
-// saved/shared image is always a crisp landscape 16:9 that fits an X post,
-// independent of the on-page responsive sizing.
+// Design: a 1:1 (square) card that is DATA-HEAVY — the quadrant mini-map,
+// axis scores and recommended parameters are the focus. No URL is baked
+// into the image (a link can't be clicked in an image), so the CTA lives in
+// the post text instead. Square is the best fit for an X in-feed image.
 export default function ShareCard({ result }) {
   const { creativity, control, cfg, params } = result
   const exportRef = useRef(null)
@@ -23,18 +21,30 @@ export default function ShareCard({ result }) {
   const color = cfg.color
   const isBalanced = cfg.label === 'Balanced Generalist'
 
+  // The recommended parameters (reference values shown on the card).
+  const recParams = {
+    temp: params.temperature,
+    top_p: params.top_p,
+    top_k: params.top_k,
+  }
+
   const shareText =
-    `I took the AI Personality test and I'm "${cfg.label}" (${isBalanced ? 'Balanced' : cfg.id}) 🎯\n` +
-    `Creative ${Math.round(creativity * 100)} · Control ${Math.round(control * 100)}\n` +
-    `My model leans on temp ${params.temperature}, top_p ${params.top_p}, ${params.top_k}.\n` +
-    `What's YOUR LLM personality? Take the test 👇`
+    `I took the AI Personality test and I'm "${cfg.label}" (${
+      isBalanced ? 'Balanced' : cfg.id
+    }) 🎯  Creative ${Math.round(creativity * 100)} · Control ${Math.round(
+      control * 100,
+    )}  →  temp ${params.temperature}, top_p ${params.top_p}, top_k ${
+      params.top_k
+    }.\nWhat's YOUR LLM personality? Take the test: https://mw00.github.io/peasant-smith/`
 
   const xIntent = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText)
+
+  const exportOpts = { pixelRatio: 1, cacheBust: true, skipFonts: true }
 
   const downloadPng = async () => {
     setDownloading(true)
     try {
-      const dataUrl = await toPng(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
+      const dataUrl = await toPng(exportRef.current, exportOpts)
       const link = document.createElement('a')
       link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
       link.href = dataUrl
@@ -46,21 +56,17 @@ export default function ShareCard({ result }) {
     }
   }
 
-  // Copy the image so it's ready to paste (Ctrl/Cmd+V) into the X composer.
   const copyImage = async () => {
     try {
-      const blob = await toBlob(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
+      const blob = await toBlob(exportRef.current, exportOpts)
       if (!blob) throw new Error('no blob')
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
       setCopiedImage(true)
       setTimeout(() => setCopiedImage(false), 2200)
     } catch (e) {
       console.error('Copy image failed:', e)
-      // Fallback: paste the image into an anchor download so the user still
-      // gets the image even if the clipboard write is blocked (e.g. no focus
-      // or clipboard permission denied).
       try {
-        const dataUrl = await toPng(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
+        const dataUrl = await toPng(exportRef.current, exportOpts)
         const link = document.createElement('a')
         link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
         link.href = dataUrl
@@ -72,10 +78,6 @@ export default function ShareCard({ result }) {
     }
   }
 
-  // One-click "share to X": copy the image to clipboard AND open X's composer
-  // with the text pre-filled. X's web intent cannot attach an image directly,
-  // so this gets you to a ready-to-post composer with the caption loaded; the
-  // image is already on your clipboard to paste (Ctrl/Cmd+V).
   const shareToX = async () => {
     await copyImage()
     window.open(xIntent, '_blank', 'noopener,noreferrer')
@@ -103,65 +105,80 @@ export default function ShareCard({ result }) {
         </h3>
       </div>
 
-      {/* Responsive on-page preview (auto height, never clipped) */}
-      <div className="w-full rounded-2xl overflow-hidden" style={{ background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`, border: `1px solid ${color}44` }}>
-        <div style={{ height: 6, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-        <div className="flex flex-col sm:flex-row">
-          <div className="flex-1 flex flex-col justify-between p-5 sm:p-6" style={{ width: '100%' }}>
-            <BrandBlock color={color} />
-            <div className="my-4">
-              <div className="text-white/60 text-[11px] font-medium uppercase tracking-widest mb-1.5">Your LLM personality</div>
-              <div className="text-white text-3xl sm:text-4xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: `${color}1f`, border: `1px solid ${color}44` }}>
-                <span className="text-white/70 text-xs font-semibold">Quadrant</span>
-                <span className="text-sm font-bold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
-              </div>
-            </div>
-            <CtaBlock color={color} />
+      {/* Responsive on-page preview (auto height, mirrors the 1:1 export) */}
+      <div className="w-full rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, #0b0c0f 0%, #17131c 50%, #0b0c0f 100%)`, border: `1px solid ${color}44` }}>
+        <div style={{ height: 5, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
+        <div className="flex flex-col items-center justify-center p-5 sm:p-6 text-center">
+          <BrandBlock color={color} />
+          <div className="mt-4 text-white/60 text-[11px] font-medium uppercase tracking-[0.2em]">Your LLM personality</div>
+          <div className="mt-1 text-white text-3xl sm:text-4xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
+          <div className="mt-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: `${color}1f`, border: `1px solid ${color}44` }}>
+            <span className="text-white/70 text-xs font-semibold">Quadrant</span>
+            <span className="text-sm font-bold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
           </div>
-          <div className="w-full sm:w-[44%] flex flex-col justify-center gap-4 p-5 sm:p-6 sm:border-l" style={{ borderColor: `${color}22` }}>
-            <div>
-              <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
-              <div className="h-3" />
-              <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-1">
-              <ShareStat label="temp" value={params.temperature} color={color} />
-              <ShareStat label="top_p" value={params.top_p} color={color} />
-              <ShareStat label="top_k" value={params.top_k} color={color} />
-            </div>
+          <div className="mt-5 w-full max-w-[340px]">
+            <QuadrantMap creativity={creativity} control={control} color={color} compact />
+          </div>
+          <div className="mt-5 w-full max-w-[320px] flex flex-col gap-3">
+            <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
+            <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+          </div>
+          <div className="mt-5 w-full grid grid-cols-3 gap-2" style={{ maxWidth: 320 }}>
+            <ShareStat label="temperature" value={recParams.temp} color={color} />
+            <ShareStat label="top_p" value={recParams.top_p} color={color} />
+            <ShareStat label="top_k" value={recParams.top_k} color={color} />
           </div>
         </div>
       </div>
 
-      {/* Hidden 16:9 export node (1280x720) — captured for download/copy */}
-      <div aria-hidden="true" style={{ position: 'fixed', top: 0, left: '-99999px', width: '1280px', height: '720px', pointerEvents: 'none', zIndex: -1 }}>
-        <div ref={exportRef} style={{ width: '1280px', height: '720px', background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`, border: `1px solid ${color}44`, boxSizing: 'border-box' }}>
-          <div style={{ height: 8, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-          <div style={{ display: 'flex', height: '712px' }}>
-            <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '48px 52px', width: '56%', boxSizing: 'border-box' }}>
-              <BrandBlock color={color} />
-              <div>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Your LLM personality</div>
-                <div style={{ color: '#fff', fontSize: '58px', fontWeight: 800, lineHeight: 1.1, textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
-                <div style={{ marginTop: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '8px 16px', background: `${color}1f`, border: `1px solid ${color}44` }}>
-                  <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600 }}>Quadrant</span>
-                  <span style={{ color, fontSize: '15px', fontWeight: 700 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
-                </div>
-              </div>
-              <CtaBlock color={color} />
+      {/* Hidden 1:1 export node (1024x1024) — captured for download/copy */}
+      <div aria-hidden="true" style={{ position: 'fixed', top: 0, left: '-99999px', width: `${X}px`, height: `${X}px`, pointerEvents: 'none', zIndex: -1 }}>
+        <div
+          ref={exportRef}
+          style={{
+            width: `${X}px`, height: `${X}px`, boxSizing: 'border-box',
+            background: `radial-gradient(circle at 20% 15%, ${color}22 0%, rgba(0,0,0,0) 45%), radial-gradient(circle at 85% 85%, #8b5cf622 0%, rgba(0,0,0,0) 45%), linear-gradient(160deg, #0b0c0f 0%, #17131c 52%, #0b0c0f 100%)`,
+            border: `1px solid ${color}55`,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
+            padding: '46px 54px',
+          }}
+        >
+          {/* top accent + brand */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', height: 6, borderRadius: 3, background: `linear-gradient(90deg, ${color}, #8b5cf6)`, marginBottom: 28 }} />
+            <BrandBlock color={color} />
+          </div>
+
+          {/* persona */}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: 600, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 12 }}>Your LLM personality</div>
+            <div style={{ color: '#fff', fontSize: 64, fontWeight: 800, lineHeight: 1.05, textShadow: `0 0 56px ${color}88` }}>{cfg.label}</div>
+            <div style={{ marginTop: 22, display: 'inline-flex', alignItems: 'center', gap: 10, borderRadius: 999, padding: '10px 20px', background: `${color}1f`, border: `1px solid ${color}55` }}>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 600 }}>Quadrant</span>
+              <span style={{ color, fontSize: 16, fontWeight: 700 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
             </div>
-            <div style={{ width: '44%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '22px', padding: '48px 52px', borderLeft: `1px solid ${color}22`, boxSizing: 'border-box' }}>
-              <div>
-                <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
-                <div style={{ height: '22px' }} />
-                <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '6px' }}>
-                <ShareStat label="temp" value={params.temperature} color={color} />
-                <ShareStat label="top_p" value={params.top_p} color={color} />
-                <ShareStat label="top_k" value={params.top_k} color={color} />
-              </div>
+          </div>
+
+          {/* quadrant map */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <QuadrantMap creativity={creativity} control={control} color={color} />
+            <div style={{ display: 'flex', width: 380, justifyContent: 'space-between', color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em' }}>
+              <span>Deterministic</span>
+              <span>Creative</span>
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em' }}>Creativity →</div>
+          </div>
+
+          {/* axis bars + params */}
+          <div style={{ width: '100%', maxWidth: 620 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
+              <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginTop: 20 }}>
+              <ShareStat label="temperature" value={recParams.temp} color={color} />
+              <ShareStat label="top_p" value={recParams.top_p} color={color} />
+              <ShareStat label="top_k" value={recParams.top_k} color={color} />
             </div>
           </div>
         </div>
@@ -212,10 +229,10 @@ export default function ShareCard({ result }) {
       </div>
 
       <p className="mt-2.5 text-center text-[11px] text-gray-400 dark:text-gray-500">
-        Share to X copies the image to your clipboard and opens the composer — just paste (Ctrl/Cmd+V) and post.
+        Share to X copies the square card to your clipboard and opens the composer — paste (Ctrl/Cmd+V) and post.
       </p>
 
-      {/* Share text */}
+      {/* Share text (includes the link, since a URL can't live in the image) */}
       <div className="mt-3">
         <div className="flex items-start gap-2">
           <textarea
@@ -243,6 +260,60 @@ export default function ShareCard({ result }) {
   )
 }
 
+// 2x2 quadrant mini-map matching the app's "Where you sit" grid exactly.
+// x-axis = creativity: -1 Deterministic(left) -> +1 Creative(right)
+// y-axis = control:    -1 Controller(top)      -> +1 Liberal(bottom)
+// The user's exact (creativity, control) position is marked by a glowing dot,
+// and their own quadrant cell is highlighted at full colour.
+function QuadrantMap({ creativity, control, color, compact }) {
+  const SIZE = compact ? 210 : 400
+  const pad = compact ? 10 : 16
+  const cell = (SIZE - 2 * pad) / 2
+  const toPercent = (v) => ((v + 1) / 2) * 100
+
+  const x = pad + (toPercent(creativity) / 100) * (SIZE - 2 * pad)
+  const y = pad + (toPercent(control) / 100) * (SIZE - 2 * pad)
+
+  const creativityKey = creativity >= 0 ? 'creative' : 'deterministic'
+  const controlKey = control >= 0 ? 'liberal' : 'controller'
+  const highlightKey = `${creativityKey}-${controlKey}`
+
+  const cells = [
+    { geo: { left: pad, top: pad }, key: 'deterministic-controller' },
+    { geo: { left: pad + cell, top: pad }, key: 'creative-controller' },
+    { geo: { left: pad, top: pad + cell }, key: 'deterministic-liberal' },
+    { geo: { left: pad + cell, top: pad + cell }, key: 'creative-liberal' },
+  ]
+
+  return (
+    <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: compact ? 16 : 22, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden' }}>
+      {cells.map(({ geo, key }) => {
+        const q = QUADRANTS[key]
+        const active = key === highlightKey
+        return (
+          <div
+            key={key}
+            style={{
+              position: 'absolute', left: geo.left, top: geo.top, width: cell, height: cell,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+              background: active ? q.color : `${q.color}14`,
+              transition: 'background 0.4s, opacity 0.4s',
+            }}
+          >
+            <span style={{ color: active ? '#fff' : q.color, fontSize: compact ? 13 : 18, fontWeight: 800, letterSpacing: '0.04em', opacity: active ? 1 : 0.7 }}>{q.id}</span>
+            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.55)', fontSize: compact ? 9.5 : 13, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px' }}>{q.label}</span>
+          </div>
+        )
+      })}
+      {/* axis dividers */}
+      <div style={{ position: 'absolute', left: pad + cell, top: pad, width: 1, height: SIZE - 2 * pad, background: 'rgba(255,255,255,0.18)' }} />
+      <div style={{ position: 'absolute', left: pad, top: pad + cell, width: SIZE - 2 * pad, height: 1, background: 'rgba(255,255,255,0.18)' }} />
+      {/* user dot */}
+      <div style={{ position: 'absolute', left: x - (compact ? 9 : 14), top: y - (compact ? 9 : 14), width: compact ? 18 : 28, height: compact ? 18 : 28, borderRadius: '50%', background: color, border: '2px solid rgba(255,255,255,0.9)', boxShadow: `0 0 0 6px ${color}44, 0 0 26px ${color}` }} />
+    </div>
+  )
+}
+
 function BrandBlock({ color }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -259,25 +330,16 @@ function BrandBlock({ color }) {
   )
 }
 
-function CtaBlock({ color }) {
-  return (
-    <div className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: `${color}1f`, border: `1px solid ${color}55` }}>
-      <span className="text-white/90 text-sm sm:text-base font-semibold">What's YOUR AI personality?</span>
-      <span className="text-base font-bold" style={{ color }}>Take the test →</span>
-    </div>
-  )
-}
-
 function ShareBar({ label, left, right, value, color }) {
   const pos = ((value + 1) / 2) * 100
   return (
     <div>
       <div className="flex justify-between text-[10px] text-white/50 font-medium mb-0.5">
         <span className="font-bold text-white/70">{label}</span>
+        <span style={{ color }} className="font-bold">{Math.round(value * 100)}</span>
       </div>
       <div className="flex justify-between text-[10px] text-white/50 font-medium mb-1">
         <span>{left}</span>
-        <span style={{ color }} className="font-bold">{Math.round(value * 100)}</span>
         <span>{right}</span>
       </div>
       <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
