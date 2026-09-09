@@ -310,14 +310,17 @@ function QuadrantMap({ creativity, control, color, compact }) {
   const controlKey = nPos ? 'liberal' : 'controller'
   const highlightKey = `${creativityKey}-${controlKey}`
 
-  // The raw continuous position, then CLAMPED into the resolved cell so the
+  // The raw continuous position, then CLAMPED inside the resolved cell so the
   // dot can never appear in a quadrant other than the one being reported.
+  // An inset (dot radius + buffer) keeps the dot's CENTER clearly inside the
+  // cell rather than straddling the divider line.
   const rawX = pad + toFraction(creativity) * (SIZE - 2 * pad)
   const rawY = pad + toFraction(control) * (SIZE - 2 * pad)
   const cellLeft = cPos ? pad + cell : pad
   const cellTop = nPos ? pad + cell : pad
-  const x = Math.min(Math.max(rawX, cellLeft), cellLeft + cell)
-  const y = Math.min(Math.max(rawY, cellTop), cellTop + cell)
+  const inset = compact ? 22 : 30 // ~half dot + buffer, keeps dot inside the cell
+  const x = Math.min(Math.max(rawX, cellLeft + inset), cellLeft + cell - inset)
+  const y = Math.min(Math.max(rawY, cellTop + inset), cellTop + cell - inset)
 
   const cells = [
     { geo: { left: pad, top: pad }, key: 'deterministic-controller' },
