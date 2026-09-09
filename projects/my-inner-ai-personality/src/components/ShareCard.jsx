@@ -3,11 +3,11 @@ import { toPng, toBlob } from 'html-to-image'
 import { AXES } from '../config/axes.js'
 
 // Renders a branded, social-ready share card for the user's result and lets
-// them download it as a PNG, copy it to the clipboard, or grab a ready-made
-// post text (+ a pre-filled X intention link).
+// them download it as a PNG, copy it to the clipboard, or share to X.
 //
-// The card is rendered at ~540px logical and exported at pixelRatio: 2 for a
-// crisp ~1080px image, which reads well on X/Twitter, LinkedIn and Instagram.
+// The card is a 16:9 LANDSCAPE layout — this is the ratio X's timeline preview
+// shows in full, so the image is not cropped/clipped the way a tall portrait
+// card would be. It's exported at pixelRatio 2 (~1600px wide) for sharpness.
 export default function ShareCard({ result }) {
   const { creativity, control, cfg, params } = result
   const cardRef = useRef(null)
@@ -19,12 +19,12 @@ export default function ShareCard({ result }) {
   const isBalanced = cfg.label === 'Balanced Generalist'
 
   const shareText =
-    `I took the LLM Personality test and I'm "${cfg.label}" (${isBalanced ? 'Balanced' : cfg.id}) 🎯\n` +
+    `I took the AI Personality test and I'm "${cfg.label}" (${isBalanced ? 'Balanced' : cfg.id}) 🎯\n` +
     `Creative ${Math.round(creativity * 100)} · Control ${Math.round(control * 100)}\n` +
     `My model leans on temp ${params.temperature}, top_p ${params.top_p}, ${params.top_k}.\n` +
-    `What's your LLM personality? Take the test 👇`
+    `What's YOUR LLM personality? Take the test 👇`
 
-  const xIntent = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText)
+  const xIntent = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText)
 
   const downloadPng = async () => {
     if (!cardRef.current) return
@@ -32,7 +32,7 @@ export default function ShareCard({ result }) {
     try {
       const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true })
       const link = document.createElement('a')
-      link.download = `llm-personality-${cfg.id || 'balanced'}.png`
+      link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
       link.href = dataUrl
       link.click()
     } catch (e) {
@@ -42,6 +42,7 @@ export default function ShareCard({ result }) {
     }
   }
 
+  // Copy the image so it's ready to paste (Ctrl/Cmd+V) into the X composer.
   const copyImage = async () => {
     if (!cardRef.current) return
     try {
@@ -52,6 +53,15 @@ export default function ShareCard({ result }) {
     } catch (e) {
       console.error('Copy image failed:', e)
     }
+  }
+
+  // One-click "share to X": copy the image to clipboard AND open X's composer
+  // with the text pre-filled. X's web intent cannot attach an image directly,
+  // so this gets you to a ready-to-post composer with the caption loaded; the
+  // image is already on your clipboard to paste (Ctrl/Cmd+V).
+  const shareToX = async () => {
+    await copyImage()
+    window.open(xIntent, '_blank', 'noopener,noreferrer')
   }
 
   const copyText = () => {
@@ -76,44 +86,58 @@ export default function ShareCard({ result }) {
         </h3>
       </div>
 
-      {/* The shareable card (this exact DOM node is exported as the image) */}
+      {/* 16:9 landscape card — the node this section is exported from */}
       <div
         ref={cardRef}
-        className="w-full rounded-2xl overflow-hidden "
+        className="w-full overflow-hidden rounded-2xl"
         style={{
+          aspectRatio: '16 / 9',
           background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`,
           border: `1px solid ${color}44`,
         }}
       >
         {/* Top accent bar */}
-        <div style={{ height: 8, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-        <div className="p-6 sm:p-7">
-          {/* Brand row */}
-          <div className="flex items-center gap-2.5 mb-6">
-            <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
-              </svg>
+        <div style={{ height: 6, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
+        <div className="flex h-[calc(100%-6px)]">
+          {/* Left column: brand + persona + CTA */}
+          <div className="flex-1 flex flex-col justify-between p-6 sm:p-8" style={{ width: '56%' }}>
+            {/* Brand row */}
+            <div className="flex items-center gap-2.5">
+              <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-9 h-9 rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-white text-[13px] font-bold leading-none">My Inner AI Personality</div>
+                <div className="text-white/50 text-[11px] leading-tight mt-0.5">Meet the AI that's most like you</div>
+              </div>
             </div>
-            <div>
-              <div className="text-white text-[13px] font-bold leading-none">LLM Personality</div>
-              <div className="text-white/50 text-[11px] leading-tight mt-0.5">Recommender</div>
+
+            {/* Persona */}
+            <div className="my-auto py-4">
+              <div className="text-white/60 text-[11px] font-medium uppercase tracking-widest mb-1.5">Your LLM personality</div>
+              <div className="text-white text-4xl sm:text-5xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>
+                {cfg.label}
+              </div>
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: `${color}1f`, border: `1px solid ${color}44` }}>
+                <span className="text-white/70 text-xs font-semibold">Quadrant</span>
+                <span className="text-sm font-bold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
+              </div>
             </div>
-            <div className="ml-auto text-[11px] font-semibold" style={{ color }}>
-              {isBalanced ? 'BALANCED' : cfg.id}
+
+            {/* CTA */}
+            <div
+              className="flex items-center justify-between rounded-xl px-4 py-3"
+              style={{ background: `${color}1f`, border: `1px solid ${color}55` }}
+            >
+              <span className="text-white/90 text-sm sm:text-base font-semibold">What's YOUR AI personality?</span>
+              <span className="text-base font-bold" style={{ color }}>Take the test →</span>
             </div>
           </div>
 
-          {/* Persona */}
-          <div className="mb-5">
-            <div className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">Your LLM personality</div>
-            <div className="text-white text-3xl font-extrabold leading-tight" style={{ textShadow: `0 0 40px ${color}66` }}>
-              {cfg.label}
-            </div>
-          </div>
-
-          {/* Score bars */}
-          <div className="space-y-4 mb-5">
+          {/* Right column: score bars + stats */}
+          <div className="w-[44%] flex flex-col justify-center gap-4 p-6 sm:p-8 border-l" style={{ borderColor: `${color}22` }}>
             <ShareBar
               label={AXES.creativity.label}
               left={AXES.creativity.deterministicLabel}
@@ -128,30 +152,29 @@ export default function ShareCard({ result }) {
               value={control}
               color={color}
             />
-          </div>
-
-          {/* Key params */}
-          <div className="grid grid-cols-3 gap-2 mb-5">
-            <ShareStat label="temp" value={params.temperature} color={color} />
-            <ShareStat label="top_p" value={params.top_p} color={color} />
-            <ShareStat label="top_k" value={params.top_k} color={color} />
-          </div>
-
-          {/* CTA */}
-          <div
-            className="flex items-center justify-between rounded-xl px-4 py-3"
-            style={{ background: `${color}1f`, border: `1px solid ${color}55` }}
-          >
-            <span className="text-white/90 text-sm font-semibold">What's YOUR LLM personality?</span>
-            <span className="text-sm font-bold" style={{ color }}>
-              Take the test →
-            </span>
+            <div className="grid grid-cols-3 gap-2 mt-1">
+              <ShareStat label="temp" value={params.temperature} color={color} />
+              <ShareStat label="top_p" value={params.top_p} color={color} />
+              <ShareStat label="top_k" value={params.top_k} color={color} />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {/* Post to X — the primary action */}
+        <button
+          onClick={shareToX}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:scale-[1.01] active:scale-[0.99]"
+          style={{ background: 'linear-gradient(135deg, #1d9bf0, #0d8bd9)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+          Share to X
+        </button>
+
         <button
           onClick={downloadPng}
           disabled={downloading}
@@ -183,6 +206,10 @@ export default function ShareCard({ result }) {
         </button>
       </div>
 
+      <p className="mt-2.5 text-center text-[11px] text-gray-400 dark:text-gray-500">
+        Share to X copies the image to your clipboard and opens the composer — just paste (Ctrl/Cmd+V) and post.
+      </p>
+
       {/* Share text */}
       <div className="mt-3">
         <div className="flex items-start gap-2">
@@ -206,17 +233,6 @@ export default function ShareCard({ result }) {
             )}
           </button>
         </div>
-        <a
-          href={xIntent}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-          </svg>
-          Post to X
-        </a>
       </div>
     </div>
   )
