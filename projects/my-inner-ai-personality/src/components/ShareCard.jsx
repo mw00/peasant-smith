@@ -29,13 +29,7 @@ export default function ShareCard({ result }) {
   }
 
   const shareText =
-    `I took the AI Personality test and I'm "${cfg.label}" (${
-      isBalanced ? 'Balanced' : cfg.id
-    }) 🎯  Creative ${Math.round(creativity * 100)} · Control ${Math.round(
-      control * 100,
-    )}  →  temp ${params.temperature}, top_p ${params.top_p}, top_k ${
-      params.top_k
-    }.\nWhat's YOUR LLM personality? Take the test: https://mw00.github.io/peasant-smith/`
+    `I got ${cfg.label} result as my AI compatibility test, check yours 👇\nhttps://mw00.github.io/peasant-smith/`
 
   const xIntent = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText)
 
