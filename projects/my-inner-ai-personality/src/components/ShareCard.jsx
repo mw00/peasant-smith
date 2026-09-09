@@ -32,7 +32,7 @@ export default function ShareCard({ result }) {
   }
 
   const shareText =
-    `I got ${cfg.label} result as my AI compatibility test, check yours 👇\nhttps://mw00.github.io/peasant-smith/`
+    `I got ${cfg.label} result as my AI compatibility test, check yours 👇\nhttps://mw00.github.io/peasant-smith/llm-profile/`
 
   const xIntent = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText)
 

@@ -3,7 +3,7 @@ name: Deploy AI Personality to Pages
 on:
   push:
     branches: [main]
-    paths: ['projects/my-inner-ai-personality/**']
+    paths: ['projects/my-inner-ai-personality/**', 'index.html']
   workflow_dispatch:
 
 permissions:
@@ -28,10 +28,15 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Stage the site (app at /llm-profile/ + hub at root)
+        run: |
+          mkdir -p _site/llm-profile
+          cp -r projects/my-inner-ai-personality/dist/* _site/llm-profile/
+          cp index.html _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: projects/my-inner-ai-personality/dist
+          path: _site
           name: github-pages
 
   deploy:
