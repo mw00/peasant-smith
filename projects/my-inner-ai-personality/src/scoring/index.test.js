@@ -68,6 +68,16 @@ describe('getQuadrant', () => {
   it('returns balanced when both axes are near-neutral', () => {
     expect(getQuadrant(0.01, -0.01)).toBe('balanced')
   })
+  it('resolves near-zero creativity toward the decisive control pole', () => {
+    // User's real case: creativity +0.02 (near-neutral), control -0.10 (controller).
+    // Near-zero creativity leans toward the control direction -> deterministic-controller (Q3).
+    expect(getQuadrant(0.02, -0.10)).toBe('deterministic-controller')
+  })
+  it('resolves near-zero control toward the decisive creativity pole', () => {
+    // creativity 0.8 (creative, decisive), control -0.01 (near-neutral).
+    // Near-zero control leans toward the positive pole of the decisive axis -> creative-liberal (Q2).
+    expect(getQuadrant(0.8, -0.01)).toBe('creative-liberal')
+  })
 })
 
 describe('getQuadrantConfig', () => {

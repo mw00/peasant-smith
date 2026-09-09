@@ -281,18 +281,43 @@ export default function ShareCard({ result }) {
 // y-axis = control:    -1 Controller(top)      -> +1 Liberal(bottom)
 // The user's exact (creativity, control) position is marked by a glowing dot,
 // and their own quadrant cell is highlighted at full colour.
+//
+// IMPORTANT: the dot is placed inside the RESOLVED quadrant cell (the same
+// NEUTRAL_BAND logic used by getQuadrant), NOT the raw axis bisector. This
+// keeps the dot consistent with the displayed result — e.g. a near-zero
+// creativity resolved toward "deterministic" draws the dot in the red Q3
+// cell even though the raw score is a hair past the center line.
 function QuadrantMap({ creativity, control, color, compact }) {
   const SIZE = compact ? 300 : 460
   const pad = compact ? 12 : 18
   const cell = (SIZE - 2 * pad) / 2
-  const toPercent = (v) => ((v + 1) / 2) * 100
+  const toFraction = (v) => (v + 1) / 2 // 0..1
 
-  const x = pad + (toPercent(creativity) / 100) * (SIZE - 2 * pad)
-  const y = pad + (toPercent(control) / 100) * (SIZE - 2 * pad)
+  // Resolve the signs exactly like scoreApi.getQuadrant (NEUTRAL_BAND = 0.05).
+  const resolve = (creativity, control) => {
+    const cNear = Math.abs(creativity) < 0.05
+    const nNear = Math.abs(control) < 0.05
+    if (cNear && nNear) return { cPos: true, nPos: true }
+    let cPos = creativity >= 0
+    let nPos = control >= 0
+    if (cNear) cPos = nNear ? true : nPos
+    if (nNear) nPos = cNear ? true : cPos
+    return { cPos, nPos }
+  }
 
-  const creativityKey = creativity >= 0 ? 'creative' : 'deterministic'
-  const controlKey = control >= 0 ? 'liberal' : 'controller'
+  const { cPos, nPos } = resolve(creativity, control)
+  const creativityKey = cPos ? 'creative' : 'deterministic'
+  const controlKey = nPos ? 'liberal' : 'controller'
   const highlightKey = `${creativityKey}-${controlKey}`
+
+  // The raw continuous position, then CLAMPED into the resolved cell so the
+  // dot can never appear in a quadrant other than the one being reported.
+  const rawX = pad + toFraction(creativity) * (SIZE - 2 * pad)
+  const rawY = pad + toFraction(control) * (SIZE - 2 * pad)
+  const cellLeft = cPos ? pad + cell : pad
+  const cellTop = nPos ? pad + cell : pad
+  const x = Math.min(Math.max(rawX, cellLeft), cellLeft + cell)
+  const y = Math.min(Math.max(rawY, cellTop), cellTop + cell)
 
   const cells = [
     { geo: { left: pad, top: pad }, key: 'deterministic-controller' },
