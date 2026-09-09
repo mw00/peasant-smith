@@ -16,6 +16,7 @@ export default function ShareCard({ result }) {
   const exportRef = useRef(null)
   const [downloading, setDownloading] = useState(false)
   const [copiedImage, setCopiedImage] = useState(false)
+  const [copyError, setCopyError] = useState(false)
   const [copiedText, setCopiedText] = useState(false)
 
   const color = cfg.color
@@ -54,27 +55,49 @@ export default function ShareCard({ result }) {
     try {
       const blob = await toBlob(exportRef.current, exportOpts)
       if (!blob) throw new Error('no blob')
+      // As of 2026 Safari, image clipboard writes via ClipboardItem are not
+      // supported; attempt it but catch cleanly.
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
       setCopiedImage(true)
       setTimeout(() => setCopiedImage(false), 2200)
     } catch (e) {
       console.error('Copy image failed:', e)
-      try {
-        const dataUrl = await toPng(exportRef.current, exportOpts)
-        const link = document.createElement('a')
-        link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
-        link.href = dataUrl
-        link.click()
-        alert('Clipboard image copy was blocked by your browser, so the image was downloaded instead.')
-      } catch (e2) {
-        console.error('Fallback failed:', e2)
-      }
+      // Graceful inline guidance instead of a jarring alert: your browser
+      // blocked the image clipboard write, so point the user to Share/Download.
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 4000)
     }
   }
 
+  // Native share sheet (mobile-friendly): shares the square image + text
+  // together via the OS share dialog. Reliable on iOS/Android — lets the user
+  // pick X directly without any clipboard gymnastics.
   const shareToX = async () => {
-    await copyImage()
-    window.open(xIntent, '_blank', 'noopener,noreferrer')
+    try {
+      const blob = await toBlob(exportRef.current, exportOpts)
+      if (!blob) throw new Error('no blob')
+      const file = new File([blob], `my-inner-ai-personality-${cfg.id || 'balanced'}.png`, { type: 'image/png' })
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          text: shareText,
+          title: 'My Inner AI Personality',
+        })
+        return
+      }
+      // No native share support (e.g. desktop) — fall back to copy + open X.
+      await copyImage()
+      window.open(xIntent, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      if (e && e.name === 'AbortError') {
+        console.log('Share cancelled by user')
+        return
+      }
+      console.error('Share failed:', e)
+      // Final fallback: copy image + open X composer.
+      await copyImage()
+      window.open(xIntent, '_blank', 'noopener,noreferrer')
+    }
   }
 
   const copyText = () => {
@@ -222,8 +245,14 @@ export default function ShareCard({ result }) {
         </button>
       </div>
 
+      {copyError && (
+        <p className="mt-2.5 text-center text-[11px] text-amber-600 dark:text-amber-400">
+          Your browser blocked the image clipboard. Tap <strong>Share to X</strong> to share it directly, or use Download PNG.
+        </p>
+      )}
+
       <p className="mt-2.5 text-center text-[11px] text-gray-400 dark:text-gray-500">
-        Share to X copies the square card to your clipboard and opens the composer — paste (Ctrl/Cmd+V) and post.
+        Share to X opens your device's share sheet (or the X composer on desktop) with the card and caption ready.
       </p>
 
       {/* Share text (includes the link, since a URL can't live in the image) */}
