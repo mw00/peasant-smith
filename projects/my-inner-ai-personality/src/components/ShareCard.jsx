@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
 import { AXES } from '../config/axes.js'
-import { QUADRANTS } from '../config/presets.js'
+import { ANIMALS, FALLBACK_ANIMAL } from '../config/presets.js'
 
 const X = 1024 // square export size
 
@@ -22,7 +22,6 @@ export default function ShareCard({ result }) {
   const [copiedText, setCopiedText] = useState(false)
 
   const color = cfg.color
-  const isBalanced = cfg.label === 'Balanced Generalist'
 
   // The recommended parameters (reference values shown on the card).
   const recParams = {
@@ -103,6 +102,8 @@ export default function ShareCard({ result }) {
     })
   }
 
+  const animal = ANIMALS[cfg.key] || FALLBACK_ANIMAL
+
   return (
     <div className="animate-fade-in-up rounded-2xl border border-gray-200/80 dark:border-white/8 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -121,28 +122,7 @@ export default function ShareCard({ result }) {
       {/* Responsive on-page preview (auto height, mirrors the 1:1 export) */}
       <div className="w-full rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, #0b0c0f 0%, #17131c 50%, #0b0c0f 100%)`, border: `1px solid ${color}44` }}>
         <div style={{ height: 5, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-        <div className="flex flex-col items-center justify-center p-5 sm:p-7 text-center">
-          <BrandBlock color={color} />
-          <div className="mt-5 text-white/70 text-[12px] font-semibold uppercase tracking-[0.22em]">Your LLM personality</div>
-          <div className="mt-1.5 text-white text-4xl sm:text-5xl font-extrabold leading-tight" style={{ textShadow: `0 0 46px ${color}77` }}>{cfg.label}</div>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1.5" style={{ background: `${color}22`, border: `1px solid ${color}55` }}>
-            <span className="text-white/70 text-xs font-semibold">Quadrant</span>
-            <span className="text-sm font-extrabold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
-          </div>
-          <div className="mt-6 w-full max-w-[360px]">
-            <QuadrantMap creativity={creativity} control={control} color={color} compact />
-          </div>
-          <div className="mt-6 w-full max-w-[360px] grid grid-cols-2 gap-3">
-            <BigStat label={AXES.creativity.creativeLabel} value={Math.round(creativity * 100)} color={color} />
-            <BigStat label={AXES.control.liberalLabel} value={Math.round(control * 100)} color={color} />
-          </div>
-          <div className="mt-4 w-full max-w-[360px] rounded-xl px-4 py-2.5 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
-            <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Recommended setup</span>
-            <span className="text-white text-sm font-bold" style={{ color }}>
-              temp {recParams.temp} · top_p {recParams.top_p} · top_k {recParams.top_k}
-            </span>
-          </div>
-        </div>
+        <CardPortrait creativity={creativity} control={control} cfg={cfg} color={color} recParams={recParams} animal={animal} responsive />
       </div>
 
       {/* Hidden 1:1 export node (1024x1024) — captured for download/copy */}
@@ -153,44 +133,10 @@ export default function ShareCard({ result }) {
             width: `${X}px`, height: `${X}px`, boxSizing: 'border-box',
             background: `radial-gradient(circle at 18% 12%, ${color}26 0%, rgba(0,0,0,0) 46%), radial-gradient(circle at 86% 88%, #8b5cf62b 0%, rgba(0,0,0,0) 46%), linear-gradient(160deg, #0b0c0f 0%, #17131c 52%, #0b0c0f 100%)`,
             border: `1px solid ${color}55`,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
-            padding: '44px 56px',
+            overflow: 'hidden',
           }}
         >
-          {/* brand */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '100%', height: 7, borderRadius: 4, background: `linear-gradient(90deg, ${color}, #8b5cf6)`, marginBottom: 22 }} />
-            <BrandBlock color={color} />
-          </div>
-
-          {/* persona hero */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>Your LLM personality</div>
-            <div style={{ color: '#fff', fontSize: 74, fontWeight: 800, lineHeight: 1.02, textShadow: `0 0 60px ${color}99` }}>{cfg.label}</div>
-            <div style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 24px', background: `${color}22`, border: `1px solid ${color}66` }}>
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 15, fontWeight: 600 }}>Quadrant</span>
-              <span style={{ color, fontSize: 17, fontWeight: 800 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
-            </div>
-          </div>
-
-          {/* quadrant map hero */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <QuadrantMap creativity={creativity} control={control} color={color} />
-          </div>
-
-          {/* big stats + recommended setup */}
-          <div style={{ width: '100%', maxWidth: 700 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }}>
-              <BigStat label={AXES.creativity.creativeLabel} value={Math.round(creativity * 100)} color={color} />
-              <BigStat label={AXES.control.liberalLabel} value={Math.round(control * 100)} color={color} />
-            </div>
-            <div style={{ marginTop: 22, borderRadius: 16, padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Recommended setup</span>
-              <span style={{ color, fontSize: 16, fontWeight: 800 }}>
-                temp {recParams.temp} &nbsp;·&nbsp; top_p {recParams.top_p} &nbsp;·&nbsp; top_k {recParams.top_k}
-              </span>
-            </div>
-          </div>
+          <CardPortrait creativity={creativity} control={control} cfg={cfg} color={color} recParams={recParams} animal={animal} />
         </div>
       </div>
 
@@ -276,112 +222,125 @@ export default function ShareCard({ result }) {
   )
 }
 
-// 2x2 quadrant mini-map matching the app's "Where you sit" grid exactly.
-// x-axis = creativity: -1 Deterministic(left) -> +1 Creative(right)
-// y-axis = control:    -1 Controller(top)      -> +1 Liberal(bottom)
-// The user's exact (creativity, control) position is marked by a glowing dot,
-// and their own quadrant cell is highlighted at full colour.
-//
-// IMPORTANT: the dot is placed inside the RESOLVED quadrant cell (the same
-// NEUTRAL_BAND logic used by getQuadrant), NOT the raw axis bisector. This
-// keeps the dot consistent with the displayed result — e.g. a near-zero
-// creativity resolved toward "deterministic" draws the dot in the red Q3
-// cell even though the raw score is a hair past the center line.
-function QuadrantMap({ creativity, control, color, compact }) {
-  const SIZE = compact ? 300 : 460
-  const pad = compact ? 12 : 18
-  const cell = (SIZE - 2 * pad) / 2
-  const toFraction = (v) => (v + 1) / 2 // 0..1
+// The reference-inspired portrait card: a color-tinted animal portrait on the
+// left with the persona name + recommended stats on the right, inside a 1:1
+// canvas. `responsive` switches between the on-page (auto-height, Tailwind)
+// version and the fixed-offscreen 1024x1024 export (inline styles).
+function CardPortrait({ creativity, control, cfg, color, recParams, animal, responsive }) {
+  const isBalanced = cfg.label === 'Balanced Generalist'
 
-  // Resolve the signs exactly like scoreApi.getQuadrant (NEUTRAL_BAND = 0.05).
-  const resolve = (creativity, control) => {
-    const cNear = Math.abs(creativity) < 0.05
-    const nNear = Math.abs(control) < 0.05
-    if (cNear && nNear) return { cPos: true, nPos: true }
-    let cPos = creativity >= 0
-    let nPos = control >= 0
-    if (cNear) cPos = nNear ? true : nPos
-    if (nNear) nPos = cNear ? true : cPos
-    return { cPos, nPos }
-  }
+  // shared visual bits, sized differently for the export vs the page preview
+  const outer = responsive
+    ? { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '28px 30px', textAlign: 'center' }
+    : { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 56px', textAlign: 'center', height: '100%' }
 
-  const { cPos, nPos } = resolve(creativity, control)
-  const creativityKey = cPos ? 'creative' : 'deterministic'
-  const controlKey = nPos ? 'liberal' : 'controller'
-  const highlightKey = `${creativityKey}-${controlKey}`
+  const portraitBox = responsive
+    ? { width: 150, height: 190, borderRadius: 18 }
+    : { width: 340, height: 430, borderRadius: 26 }
 
-  // The raw continuous position, then CLAMPED inside the resolved cell so the
-  // dot can never appear in a quadrant other than the one being reported.
-  // An inset (dot radius + buffer) keeps the dot's CENTER clearly inside the
-  // cell rather than straddling the divider line.
-  const rawX = pad + toFraction(creativity) * (SIZE - 2 * pad)
-  const rawY = pad + toFraction(control) * (SIZE - 2 * pad)
-  const cellLeft = cPos ? pad + cell : pad
-  const cellTop = nPos ? pad + cell : pad
-  const inset = compact ? 22 : 30 // ~half dot + buffer, keeps dot inside the cell
-  const x = Math.min(Math.max(rawX, cellLeft + inset), cellLeft + cell - inset)
-  const y = Math.min(Math.max(rawY, cellTop + inset), cellTop + cell - inset)
-
-  const cells = [
-    { geo: { left: pad, top: pad }, key: 'deterministic-controller' },
-    { geo: { left: pad + cell, top: pad }, key: 'creative-controller' },
-    { geo: { left: pad, top: pad + cell }, key: 'deterministic-liberal' },
-    { geo: { left: pad + cell, top: pad + cell }, key: 'creative-liberal' },
-  ]
+  const emojiSize = responsive ? 86 : 210
 
   return (
-    <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: compact ? 18 : 24, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden' }}>
-      {cells.map(({ geo, key }) => {
-        const q = QUADRANTS[key]
-        const active = key === highlightKey
-        return (
+    <div style={outer}>
+      {/* header: brand tab + quadrant badge */}
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: responsive ? 14 : 26 }}>
+        <BrandBlock color={color} compact={responsive} />
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: responsive ? '6px 10px' : '10px 16px', borderRadius: 999, background: `${color}22`, border: `1px solid ${color}55` }}>
+          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: responsive ? 10 : 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quadrant</span>
+          <span style={{ color, fontSize: responsive ? 13 : 17, fontWeight: 800 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
+        </div>
+      </div>
+
+      {/* eyebrow */}
+      <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: responsive ? 12 : 15, fontWeight: 700, letterSpacing: responsive ? '0.2em' : '0.3em', textTransform: 'uppercase', marginBottom: responsive ? 10 : 18 }}>
+        {animal.name} · Your LLM personality
+      </div>
+
+      {/* split: animal portrait (left) + name & stats (right) */}
+      <div style={{ width: '100%', display: 'flex', flexDirection: responsive ? 'column' : 'row', alignItems: 'center', gap: responsive ? 20 : 44, flex: 1 }}>
+        {/* portrait */}
+        <div style={{ flexShrink: 0 }}>
           <div
-            key={key}
             style={{
-              position: 'absolute', left: geo.left, top: geo.top, width: cell, height: cell,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
-              background: active ? q.color : `${q.color}14`,
+              ...portraitBox,
+              position: 'relative',
+              border: `2px solid ${color}66`,
+              background: `linear-gradient(160deg, ${color}30 0%, ${color}0f 100%)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: `0 18px 50px ${color}33`,
             }}
           >
-            <span style={{ color: active ? '#fff' : q.color, fontSize: compact ? 17 : 22, fontWeight: 800, letterSpacing: '0.04em', opacity: active ? 1 : 0.75 }}>{q.id}</span>
-            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)', fontSize: compact ? 12 : 16, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{q.label}</span>
+            <span style={{ fontSize: emojiSize, filter: 'drop-shadow(0 10px 24px rgba(0,0,0,0.4))', lineHeight: 1 }}>{animal.emoji}</span>
+            {/* corner tab like the reference's "SP" badge */}
+            <div style={{ position: 'absolute', top: 12, left: 12, padding: responsive ? '3px 8px' : '6px 12px', borderRadius: 8, background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: responsive ? 10 : 14, fontWeight: 800, letterSpacing: '0.08em' }}>{cfg.id || 'Q'}</div>
           </div>
-        )
-      })}
-      {/* axis dividers */}
-      <div style={{ position: 'absolute', left: pad + cell, top: pad, width: 1, height: SIZE - 2 * pad, background: 'rgba(255,255,255,0.18)' }} />
-      <div style={{ position: 'absolute', left: pad, top: pad + cell, width: SIZE - 2 * pad, height: 1, background: 'rgba(255,255,255,0.18)' }} />
-      {/* user dot */}
-      <div style={{ position: 'absolute', left: x - (compact ? 11 : 16), top: y - (compact ? 11 : 16), width: compact ? 22 : 32, height: compact ? 22 : 32, borderRadius: '50%', background: color, border: '2px solid rgba(255,255,255,0.9)', boxShadow: `0 0 0 6px ${color}44, 0 0 30px ${color}` }} />
+        </div>
+
+        {/* right column: name + special parameters + special power */}
+        <div style={{ flex: 1, width: '100%', textAlign: responsive ? 'center' : 'left' }}>
+          <div style={{ color: '#fff', fontSize: responsive ? 30 : 56, fontWeight: 800, lineHeight: 1.04, textShadow: `0 0 40px ${color}77` }}>{cfg.label}</div>
+
+          {/* SPECIAL PARAMETERS */}
+          <div style={{ marginTop: responsive ? 16 : 30 }}>
+            <div style={{ color, fontSize: responsive ? 11 : 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: responsive ? 8 : 14 }}>Special parameters</div>
+            <div style={{ display: 'flex', gap: responsive ? 10 : 16 }}>
+              {[
+                ['temp', recParams.temp],
+                ['top_p', recParams.top_p],
+                ['top_k', recParams.top_k],
+              ].map(([k, v]) => (
+                <div key={k} style={{ flex: 1, borderRadius: 14, padding: responsive ? '10px 6px' : '16px 10px', background: 'rgba(255,255,255,0.05)', border: `1px solid ${color}33` }}>
+                  <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: responsive ? 9 : 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
+                  <div style={{ color, fontSize: responsive ? 20 : 36, fontWeight: 800, marginTop: 2, lineHeight: 1 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* SPECIAL POWER */}
+          <div style={{ marginTop: responsive ? 16 : 30 }}>
+            <div style={{ color, fontSize: responsive ? 11 : 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: responsive ? 8 : 14 }}>Special power</div>
+            <div style={{ display: 'flex', gap: responsive ? 10 : 16 }}>
+              <StatChip label={AXES.creativity.creativeLabel} value={Math.round(creativity * 100)} color={color} responsive={responsive} />
+              <StatChip label={AXES.control.liberalLabel} value={Math.round(control * 100)} color={color} responsive={responsive} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* footer archetype line */}
+      <div style={{ marginTop: responsive ? 16 : 30, color: 'rgba(255,255,255,0.55)', fontSize: responsive ? 12 : 16, fontWeight: 500, fontStyle: 'italic', lineHeight: 1.45, maxWidth: 880 }}>
+        “{cfg.archetype}”
+      </div>
     </div>
   )
 }
 
-function BrandBlock({ color }) {
+// A single axis-score stat chip (the "special power" numbers).
+function StatChip({ label, value, color, responsive }) {
+  return (
+    <div style={{ flex: 1, borderRadius: 14, padding: responsive ? '10px 6px' : '16px 10px', background: 'rgba(255,255,255,0.05)', border: `1px solid ${color}33`, textAlign: 'center' }}>
+      <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: responsive ? 9 : 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+      <div style={{ color, fontSize: responsive ? 22 : 40, fontWeight: 800, marginTop: 2, lineHeight: 1 }}>{value}</div>
+    </div>
+  )
+}
+
+
+function BrandBlock({ color, compact }) {
+  const logo = compact ? 30 : 46
+  const title = compact ? 14 : 18
+  const sub = compact ? 11 : 13
   return (
     <div className="flex items-center gap-3">
-      <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shrink-0">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="rounded-xl flex items-center justify-center shadow-lg shrink-0" width={logo} height={logo}>
+        <svg width={compact ? 16 : 22} height={compact ? 16 : 22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
         </svg>
       </div>
-      <div>
-        <div className="text-white text-[15px] font-bold leading-none">My Inner AI Personality</div>
-        <div className="text-white/55 text-[12px] leading-tight mt-0.5">Meet the AI that's most like you</div>
-      </div>
-    </div>
-  )
-}
-
-// A large, bold stat readout in the style of a sports/trading card — the
-// number is the hero, with a small axis label and a thin fill bar behind it.
-function BigStat({ label, value, color }) {
-  return (
-    <div className="rounded-2xl px-4 py-3 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
-      <div className="text-white/55 text-[10px] sm:text-xs font-bold uppercase tracking-[0.12em]">{label}</div>
-      <div className="text-white text-4xl sm:text-5xl font-extrabold leading-none my-1" style={{ color, textShadow: `0 0 26px ${color}66` }}>{value}</div>
-      <div className="mx-auto h-1.5 rounded-full bg-white/10 overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${value}%`, background: `linear-gradient(90deg, ${color}55, ${color})` }} />
+      <div className="text-left">
+        <div className="text-white font-bold leading-none" style={{ fontSize: title }}>My Inner AI Personality</div>
+        <div className="text-white/55 leading-tight mt-0.5" style={{ fontSize: sub }}>Meet the AI that's most like you</div>
       </div>
     </div>
   )

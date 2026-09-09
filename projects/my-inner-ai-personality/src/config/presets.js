@@ -104,3 +104,18 @@ export const CLIENT_NOTES = [
       `send temperature, top_p, frequency_penalty, presence_penalty, max_tokens as request fields (top_k/seed not supported)`,
   },
 ]
+
+// Animal mascot for each quadrant, used on the share card portrait.
+// Q1 = creative-controller (blue)  -> Eagle        (vision + command)
+// Q2 = creative-liberal  (purple)  -> Otter        (playful, free, clever)
+// Q3 = deterministic-controller (red) -> Beaver    (the precision builder)
+// Q4 = deterministic-liberal (green) -> Owl        (wise, analytical)
+export const ANIMALS = {
+  'creative-controller': { emoji: '🦅', name: 'Eagle' },
+  'creative-liberal': { emoji: '🦦', name: 'Otter' },
+  'deterministic-controller': { emoji: '🦫', name: 'Beaver' },
+  'deterministic-liberal': { emoji: '🦉', name: 'Owl' },
+}
+
+// fallback for the neutral/balanced result
+export const FALLBACK_ANIMAL = { emoji: '🦉', name: 'Owl' }
