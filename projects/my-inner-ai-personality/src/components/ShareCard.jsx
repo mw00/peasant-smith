@@ -5,12 +5,17 @@ import { AXES } from '../config/axes.js'
 // Renders a branded, social-ready share card for the user's result and lets
 // them download it as a PNG, copy it to the clipboard, or share to X.
 //
-// The card is a 16:9 LANDSCAPE layout — this is the ratio X's timeline preview
-// shows in full, so the image is not cropped/clipped the way a tall portrait
-// card would be. It's exported at pixelRatio 2 (~1600px wide) for sharpness.
+// Display: the card is FULLY RESPONSIVE (auto height) so it always shows
+// completely on any screen width — no more clipped/overflowing content on
+// mobile. It stacks vertically on small screens and goes two-column wide on
+// larger ones.
+//
+// Export: a dedicated off-screen 1280x720 (16:9) node is captured, so the
+// saved/shared image is always a crisp landscape 16:9 that fits an X post,
+// independent of the on-page responsive sizing.
 export default function ShareCard({ result }) {
   const { creativity, control, cfg, params } = result
-  const cardRef = useRef(null)
+  const exportRef = useRef(null)
   const [downloading, setDownloading] = useState(false)
   const [copiedImage, setCopiedImage] = useState(false)
   const [copiedText, setCopiedText] = useState(false)
@@ -27,10 +32,9 @@ export default function ShareCard({ result }) {
   const xIntent = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText)
 
   const downloadPng = async () => {
-    if (!cardRef.current) return
     setDownloading(true)
     try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true })
+      const dataUrl = await toPng(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
       const link = document.createElement('a')
       link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
       link.href = dataUrl
@@ -44,14 +48,27 @@ export default function ShareCard({ result }) {
 
   // Copy the image so it's ready to paste (Ctrl/Cmd+V) into the X composer.
   const copyImage = async () => {
-    if (!cardRef.current) return
     try {
-      const blob = await toBlob(cardRef.current, { pixelRatio: 2, cacheBust: true })
+      const blob = await toBlob(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
+      if (!blob) throw new Error('no blob')
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
       setCopiedImage(true)
       setTimeout(() => setCopiedImage(false), 2200)
     } catch (e) {
       console.error('Copy image failed:', e)
+      // Fallback: paste the image into an anchor download so the user still
+      // gets the image even if the clipboard write is blocked (e.g. no focus
+      // or clipboard permission denied).
+      try {
+        const dataUrl = await toPng(exportRef.current, { pixelRatio: 1, cacheBust: true, skipFonts: true })
+        const link = document.createElement('a')
+        link.download = `my-inner-ai-personality-${cfg.id || 'balanced'}.png`
+        link.href = dataUrl
+        link.click()
+        alert('Clipboard image copy was blocked by your browser, so the image was downloaded instead.')
+      } catch (e2) {
+        console.error('Fallback failed:', e2)
+      }
     }
   }
 
@@ -86,72 +103,28 @@ export default function ShareCard({ result }) {
         </h3>
       </div>
 
-      {/* 16:9 landscape card — the node this section is exported from */}
-      <div
-        ref={cardRef}
-        className="w-full overflow-hidden rounded-2xl"
-        style={{
-          aspectRatio: '16 / 9',
-          background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`,
-          border: `1px solid ${color}44`,
-        }}
-      >
-        {/* Top accent bar */}
+      {/* Responsive on-page preview (auto height, never clipped) */}
+      <div className="w-full rounded-2xl overflow-hidden" style={{ background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`, border: `1px solid ${color}44` }}>
         <div style={{ height: 6, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-        <div className="flex h-[calc(100%-6px)]">
-          {/* Left column: brand + persona + CTA */}
-          <div className="flex-1 flex flex-col justify-between p-6 sm:p-8" style={{ width: '56%' }}>
-            {/* Brand row */}
-            <div className="flex items-center gap-2.5">
-              <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-9 h-9 rounded-lg flex items-center justify-center shadow-lg shrink-0">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-white text-[13px] font-bold leading-none">My Inner AI Personality</div>
-                <div className="text-white/50 text-[11px] leading-tight mt-0.5">Meet the AI that's most like you</div>
-              </div>
-            </div>
-
-            {/* Persona */}
-            <div className="my-auto py-4">
+        <div className="flex flex-col sm:flex-row">
+          <div className="flex-1 flex flex-col justify-between p-5 sm:p-6" style={{ width: '100%' }}>
+            <BrandBlock color={color} />
+            <div className="my-4">
               <div className="text-white/60 text-[11px] font-medium uppercase tracking-widest mb-1.5">Your LLM personality</div>
-              <div className="text-white text-4xl sm:text-5xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>
-                {cfg.label}
-              </div>
+              <div className="text-white text-3xl sm:text-4xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
               <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: `${color}1f`, border: `1px solid ${color}44` }}>
                 <span className="text-white/70 text-xs font-semibold">Quadrant</span>
                 <span className="text-sm font-bold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
               </div>
             </div>
-
-            {/* CTA */}
-            <div
-              className="flex items-center justify-between rounded-xl px-4 py-3"
-              style={{ background: `${color}1f`, border: `1px solid ${color}55` }}
-            >
-              <span className="text-white/90 text-sm sm:text-base font-semibold">What's YOUR AI personality?</span>
-              <span className="text-base font-bold" style={{ color }}>Take the test →</span>
-            </div>
+            <CtaBlock color={color} />
           </div>
-
-          {/* Right column: score bars + stats */}
-          <div className="w-[44%] flex flex-col justify-center gap-4 p-6 sm:p-8 border-l" style={{ borderColor: `${color}22` }}>
-            <ShareBar
-              label={AXES.creativity.label}
-              left={AXES.creativity.deterministicLabel}
-              right={AXES.creativity.creativeLabel}
-              value={creativity}
-              color={color}
-            />
-            <ShareBar
-              label={AXES.control.label}
-              left={AXES.control.controllerLabel}
-              right={AXES.control.liberalLabel}
-              value={control}
-              color={color}
-            />
+          <div className="w-full sm:w-[44%] flex flex-col justify-center gap-4 p-5 sm:p-6 sm:border-l" style={{ borderColor: `${color}22` }}>
+            <div>
+              <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
+              <div className="h-3" />
+              <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+            </div>
             <div className="grid grid-cols-3 gap-2 mt-1">
               <ShareStat label="temp" value={params.temperature} color={color} />
               <ShareStat label="top_p" value={params.top_p} color={color} />
@@ -161,9 +134,41 @@ export default function ShareCard({ result }) {
         </div>
       </div>
 
+      {/* Hidden 16:9 export node (1280x720) — captured for download/copy */}
+      <div aria-hidden="true" style={{ position: 'fixed', top: 0, left: '-99999px', width: '1280px', height: '720px', pointerEvents: 'none', zIndex: -1 }}>
+        <div ref={exportRef} style={{ width: '1280px', height: '720px', background: `linear-gradient(145deg, #0b0c0f 0%, #14151a 45%, #0b0c0f 100%)`, border: `1px solid ${color}44`, boxSizing: 'border-box' }}>
+          <div style={{ height: 8, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
+          <div style={{ display: 'flex', height: '712px' }}>
+            <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '48px 52px', width: '56%', boxSizing: 'border-box' }}>
+              <BrandBlock color={color} />
+              <div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Your LLM personality</div>
+                <div style={{ color: '#fff', fontSize: '58px', fontWeight: 800, lineHeight: 1.1, textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
+                <div style={{ marginTop: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '8px 16px', background: `${color}1f`, border: `1px solid ${color}44` }}>
+                  <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600 }}>Quadrant</span>
+                  <span style={{ color, fontSize: '15px', fontWeight: 700 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
+                </div>
+              </div>
+              <CtaBlock color={color} />
+            </div>
+            <div style={{ width: '44%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '22px', padding: '48px 52px', borderLeft: `1px solid ${color}22`, boxSizing: 'border-box' }}>
+              <div>
+                <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
+                <div style={{ height: '22px' }} />
+                <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '6px' }}>
+                <ShareStat label="temp" value={params.temperature} color={color} />
+                <ShareStat label="top_p" value={params.top_p} color={color} />
+                <ShareStat label="top_k" value={params.top_k} color={color} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {/* Post to X — the primary action */}
         <button
           onClick={shareToX}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:scale-[1.01] active:scale-[0.99]"
@@ -234,6 +239,31 @@ export default function ShareCard({ result }) {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function BrandBlock({ color }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-9 h-9 rounded-lg flex items-center justify-center shadow-lg shrink-0">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+        </svg>
+      </div>
+      <div>
+        <div className="text-white text-[13px] font-bold leading-none">My Inner AI Personality</div>
+        <div className="text-white/50 text-[11px] leading-tight mt-0.5">Meet the AI that's most like you</div>
+      </div>
+    </div>
+  )
+}
+
+function CtaBlock({ color }) {
+  return (
+    <div className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: `${color}1f`, border: `1px solid ${color}55` }}>
+      <span className="text-white/90 text-sm sm:text-base font-semibold">What's YOUR AI personality?</span>
+      <span className="text-base font-bold" style={{ color }}>Take the test →</span>
     </div>
   )
 }
