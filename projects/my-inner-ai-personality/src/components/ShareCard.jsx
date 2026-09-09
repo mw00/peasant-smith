@@ -344,7 +344,7 @@ function QuadrantMap({ creativity, control, color, compact }) {
             }}
           >
             <span style={{ color: active ? '#fff' : q.color, fontSize: compact ? 17 : 22, fontWeight: 800, letterSpacing: '0.04em', opacity: active ? 1 : 0.75 }}>{q.id}</span>
-            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)', fontSize: compact ? 12 : 16, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px' }}>{q.label}</span>
+            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)', fontSize: compact ? 12 : 16, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{q.label}</span>
           </div>
         )
       })}

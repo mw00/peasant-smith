@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { QUESTIONS } from './config/questions.js'
 import { AXES } from './config/axes.js'
-import { QUADRANTS, FALLBACK, CLIENT_NOTES } from './config/presets.js'
+import { QUADRANTS, FALLBACK } from './config/presets.js'
 import { scoreAxis, getQuadrantConfig, recommendParams } from './scoring/index.js'
 import ShareCard from './components/ShareCard.jsx'
 
@@ -293,7 +293,6 @@ function Result({ result, reset }) {
       </div>
 
       <ParamTable params={params} />
-      <PresetBlock params={params} />
       <ShareCard result={result} />
 
       <div className="flex justify-center pt-2">
@@ -341,12 +340,18 @@ function QuadrantGrid({ creativity, control, highlightKey }) {
         </span>
         Where you sit
       </h3>
-      <div className="flex justify-between text-[11px] font-medium text-gray-400 dark:text-gray-500 mb-1 px-1">
-        <span>{AXES.creativity.deterministicLabel}</span>
-        <span>{AXES.creativity.creativeLabel}</span>
+      {/* top axis labels — left gutter mirrors the one under the grid so they align to the grid's edges */}
+      <div className="flex items-stretch">
+        <div className="w-16 shrink-0" />
+        <div className="flex-1 flex justify-between text-[11px] font-medium text-gray-400 dark:text-gray-500 mb-1">
+          <span>{AXES.creativity.deterministicLabel}</span>
+          <span>{AXES.creativity.creativeLabel}</span>
+        </div>
+        <div className="w-16 shrink-0" />
       </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col justify-between text-[11px] font-medium text-gray-400 dark:text-gray-500">
+      <div className="flex items-stretch">
+        {/* left y-axis labels */}
+        <div className="flex flex-col justify-between text-[11px] font-medium text-gray-400 dark:text-gray-500 py-0 w-16 shrink-0">
           <span>{AXES.control.controllerLabel}</span>
           <span>{AXES.control.liberalLabel}</span>
         </div>
@@ -360,7 +365,7 @@ function QuadrantGrid({ creativity, control, highlightKey }) {
               style={{ background: c.color, opacity: key === highlightKey ? 0.85 : 0.3 }}
             >
               <span className="text-white text-sm font-extrabold drop-shadow">{c.id}</span>
-              <span className="text-white/90 text-[10px] font-semibold leading-tight text-center">{c.label}</span>
+              <span className="text-white/90 text-[10px] font-semibold leading-tight text-center" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 'calc(100% - 8px)' }}>{c.label}</span>
             </div>
           ))}
           {/* Highlight ring around user's quadrant */}
@@ -386,6 +391,8 @@ function QuadrantGrid({ creativity, control, highlightKey }) {
             title={`Creativity ${(creativity * 100).toFixed(0)}, Control ${(control * 100).toFixed(0)}`}
           />
         </div>
+        {/* right spacer to keep the grid centered */}
+        <div className="w-16 shrink-0" />
       </div>
     </div>
   )
@@ -448,77 +455,6 @@ function ParamTable({ params }) {
               {v ?? 'random'}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400">{why}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function PresetBlock({ params }) {
-  const [copied, setCopied] = useState(false)
-  const json = JSON.stringify(
-    {
-      temperature: params.temperature,
-      top_p: params.top_p,
-      top_k: params.top_k,
-      repeat_penalty: params.repeat_penalty,
-      frequency_penalty: params.frequency_penalty,
-      presence_penalty: params.presence_penalty,
-      max_tokens: params.max_tokens,
-      seed: params.seed,
-    },
-    null,
-    2
-  )
-
-  const copyJson = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(json).then(() => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      })
-    }
-  }
-
-  return (
-    <div className="animate-fade-in-up rounded-2xl border border-gray-200/80 dark:border-white/8 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500 dark:text-indigo-400">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-          Copyable preset
-        </h3>
-        <button
-          onClick={copyJson}
-          className={`inline-flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 ${
-            copied
-              ? 'bg-emerald-500 text-white'
-              : 'bg-gradient-to-r from-[#6d6aff] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95'
-          }`}
-        >
-          {copied ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-              Copied!
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              Copy JSON
-            </>
-          )}
-        </button>
-      </div>
-      <pre className="mt-2 p-4 rounded-xl bg-gray-50 dark:bg-black/40 border border-gray-200/70 dark:border-white/10 text-xs font-mono overflow-x-auto text-gray-700 dark:text-gray-200">{json}</pre>
-      <div className="mt-5 space-y-2.5">
-        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Per client</h4>
-        {CLIENT_NOTES.map((n) => (
-          <div key={n.client} className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold px-2 py-1 rounded-md bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300">{n.client}</span>
-            <code className="text-xs p-1.5 rounded-lg bg-gray-50 dark:bg-black/30 border border-gray-200/70 dark:border-white/5 text-gray-600 dark:text-gray-300">{n.cmd(params)}</code>
           </div>
         ))}
       </div>
