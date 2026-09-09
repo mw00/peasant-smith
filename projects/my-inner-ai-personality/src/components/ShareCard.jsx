@@ -7,10 +7,12 @@ const X = 1024 // square export size
 
 // Renders a branded, social-ready share card for the user's result.
 //
-// Design: a 1:1 (square) card that is DATA-HEAVY — the quadrant mini-map,
-// axis scores and recommended parameters are the focus. No URL is baked
-// into the image (a link can't be clicked in an image), so the CTA lives in
-// the post text instead. Square is the best fit for an X in-feed image.
+// Design: a bold, gaming-card-inspired 1:1 (square) card tuned for MOBILE
+// legibility on an X post. The persona name is the hero, the 2x2 quadrant
+// map is the visual centerpiece, and the two axis scores are shown as LARGE
+// stat numbers (not thin bars) so they stay readable when the image is shown
+// small on a phone. No URL is baked into the image — the link lives in the
+// post text. Square is the best fit for an X in-feed image.
 export default function ShareCard({ result }) {
   const { creativity, control, cfg, params } = result
   const exportRef = useRef(null)
@@ -55,15 +57,11 @@ export default function ShareCard({ result }) {
     try {
       const blob = await toBlob(exportRef.current, exportOpts)
       if (!blob) throw new Error('no blob')
-      // As of 2026 Safari, image clipboard writes via ClipboardItem are not
-      // supported; attempt it but catch cleanly.
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
       setCopiedImage(true)
       setTimeout(() => setCopiedImage(false), 2200)
     } catch (e) {
       console.error('Copy image failed:', e)
-      // Graceful inline guidance instead of a jarring alert: your browser
-      // blocked the image clipboard write, so point the user to Share/Download.
       setCopyError(true)
       setTimeout(() => setCopyError(false), 4000)
     }
@@ -85,7 +83,6 @@ export default function ShareCard({ result }) {
         })
         return
       }
-      // No native share support (e.g. desktop) — fall back to copy + open X.
       await copyImage()
       window.open(xIntent, '_blank', 'noopener,noreferrer')
     } catch (e) {
@@ -94,7 +91,6 @@ export default function ShareCard({ result }) {
         return
       }
       console.error('Share failed:', e)
-      // Final fallback: copy image + open X composer.
       await copyImage()
       window.open(xIntent, '_blank', 'noopener,noreferrer')
     }
@@ -125,25 +121,26 @@ export default function ShareCard({ result }) {
       {/* Responsive on-page preview (auto height, mirrors the 1:1 export) */}
       <div className="w-full rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, #0b0c0f 0%, #17131c 50%, #0b0c0f 100%)`, border: `1px solid ${color}44` }}>
         <div style={{ height: 5, background: `linear-gradient(90deg, ${color}, #8b5cf6)` }} />
-        <div className="flex flex-col items-center justify-center p-5 sm:p-6 text-center">
+        <div className="flex flex-col items-center justify-center p-5 sm:p-7 text-center">
           <BrandBlock color={color} />
-          <div className="mt-4 text-white/60 text-[11px] font-medium uppercase tracking-[0.2em]">Your LLM personality</div>
-          <div className="mt-1 text-white text-3xl sm:text-4xl font-extrabold leading-tight" style={{ textShadow: `0 0 44px ${color}66` }}>{cfg.label}</div>
-          <div className="mt-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: `${color}1f`, border: `1px solid ${color}44` }}>
+          <div className="mt-5 text-white/70 text-[12px] font-semibold uppercase tracking-[0.22em]">Your LLM personality</div>
+          <div className="mt-1.5 text-white text-4xl sm:text-5xl font-extrabold leading-tight" style={{ textShadow: `0 0 46px ${color}77` }}>{cfg.label}</div>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1.5" style={{ background: `${color}22`, border: `1px solid ${color}55` }}>
             <span className="text-white/70 text-xs font-semibold">Quadrant</span>
-            <span className="text-sm font-bold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
+            <span className="text-sm font-extrabold" style={{ color }}>{isBalanced ? 'Balanced' : cfg.id}</span>
           </div>
-          <div className="mt-5 w-full max-w-[340px]">
+          <div className="mt-6 w-full max-w-[360px]">
             <QuadrantMap creativity={creativity} control={control} color={color} compact />
           </div>
-          <div className="mt-5 w-full max-w-[320px] flex flex-col gap-3">
-            <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
-            <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+          <div className="mt-6 w-full max-w-[360px] grid grid-cols-2 gap-3">
+            <BigStat label={AXES.creativity.creativeLabel} value={Math.round(creativity * 100)} color={color} />
+            <BigStat label={AXES.control.liberalLabel} value={Math.round(control * 100)} color={color} />
           </div>
-          <div className="mt-5 w-full grid grid-cols-3 gap-2" style={{ maxWidth: 320 }}>
-            <ShareStat label="temperature" value={recParams.temp} color={color} />
-            <ShareStat label="top_p" value={recParams.top_p} color={color} />
-            <ShareStat label="top_k" value={recParams.top_k} color={color} />
+          <div className="mt-4 w-full max-w-[360px] rounded-xl px-4 py-2.5 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
+            <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Recommended setup</span>
+            <span className="text-white text-sm font-bold" style={{ color }}>
+              temp {recParams.temp} · top_p {recParams.top_p} · top_k {recParams.top_k}
+            </span>
           </div>
         </div>
       </div>
@@ -154,48 +151,44 @@ export default function ShareCard({ result }) {
           ref={exportRef}
           style={{
             width: `${X}px`, height: `${X}px`, boxSizing: 'border-box',
-            background: `radial-gradient(circle at 20% 15%, ${color}22 0%, rgba(0,0,0,0) 45%), radial-gradient(circle at 85% 85%, #8b5cf622 0%, rgba(0,0,0,0) 45%), linear-gradient(160deg, #0b0c0f 0%, #17131c 52%, #0b0c0f 100%)`,
+            background: `radial-gradient(circle at 18% 12%, ${color}26 0%, rgba(0,0,0,0) 46%), radial-gradient(circle at 86% 88%, #8b5cf62b 0%, rgba(0,0,0,0) 46%), linear-gradient(160deg, #0b0c0f 0%, #17131c 52%, #0b0c0f 100%)`,
             border: `1px solid ${color}55`,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
-            padding: '46px 54px',
+            padding: '44px 56px',
           }}
         >
-          {/* top accent + brand */}
+          {/* brand */}
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '100%', height: 6, borderRadius: 3, background: `linear-gradient(90deg, ${color}, #8b5cf6)`, marginBottom: 28 }} />
+            <div style={{ width: '100%', height: 7, borderRadius: 4, background: `linear-gradient(90deg, ${color}, #8b5cf6)`, marginBottom: 22 }} />
             <BrandBlock color={color} />
           </div>
 
-          {/* persona */}
+          {/* persona hero */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: 600, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 12 }}>Your LLM personality</div>
-            <div style={{ color: '#fff', fontSize: 64, fontWeight: 800, lineHeight: 1.05, textShadow: `0 0 56px ${color}88` }}>{cfg.label}</div>
-            <div style={{ marginTop: 22, display: 'inline-flex', alignItems: 'center', gap: 10, borderRadius: 999, padding: '10px 20px', background: `${color}1f`, border: `1px solid ${color}55` }}>
-              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 600 }}>Quadrant</span>
-              <span style={{ color, fontSize: 16, fontWeight: 700 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
+            <div style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>Your LLM personality</div>
+            <div style={{ color: '#fff', fontSize: 74, fontWeight: 800, lineHeight: 1.02, textShadow: `0 0 60px ${color}99` }}>{cfg.label}</div>
+            <div style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 24px', background: `${color}22`, border: `1px solid ${color}66` }}>
+              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 15, fontWeight: 600 }}>Quadrant</span>
+              <span style={{ color, fontSize: 17, fontWeight: 800 }}>{isBalanced ? 'Balanced' : cfg.id}</span>
             </div>
           </div>
 
-          {/* quadrant map */}
+          {/* quadrant map hero */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <QuadrantMap creativity={creativity} control={control} color={color} />
-            <div style={{ display: 'flex', width: 380, justifyContent: 'space-between', color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em' }}>
-              <span>Deterministic</span>
-              <span>Creative</span>
-            </div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em' }}>Creativity →</div>
           </div>
 
-          {/* axis bars + params */}
-          <div style={{ width: '100%', maxWidth: 620 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <ShareBar label={AXES.creativity.label} left={AXES.creativity.deterministicLabel} right={AXES.creativity.creativeLabel} value={creativity} color={color} />
-              <ShareBar label={AXES.control.label} left={AXES.control.controllerLabel} right={AXES.control.liberalLabel} value={control} color={color} />
+          {/* big stats + recommended setup */}
+          <div style={{ width: '100%', maxWidth: 700 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }}>
+              <BigStat label={AXES.creativity.creativeLabel} value={Math.round(creativity * 100)} color={color} />
+              <BigStat label={AXES.control.liberalLabel} value={Math.round(control * 100)} color={color} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginTop: 20 }}>
-              <ShareStat label="temperature" value={recParams.temp} color={color} />
-              <ShareStat label="top_p" value={recParams.top_p} color={color} />
-              <ShareStat label="top_k" value={recParams.top_k} color={color} />
+            <div style={{ marginTop: 22, borderRadius: 16, padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Recommended setup</span>
+              <span style={{ color, fontSize: 16, fontWeight: 800 }}>
+                temp {recParams.temp} &nbsp;·&nbsp; top_p {recParams.top_p} &nbsp;·&nbsp; top_k {recParams.top_k}
+              </span>
             </div>
           </div>
         </div>
@@ -289,8 +282,8 @@ export default function ShareCard({ result }) {
 // The user's exact (creativity, control) position is marked by a glowing dot,
 // and their own quadrant cell is highlighted at full colour.
 function QuadrantMap({ creativity, control, color, compact }) {
-  const SIZE = compact ? 210 : 400
-  const pad = compact ? 10 : 16
+  const SIZE = compact ? 300 : 460
+  const pad = compact ? 12 : 18
   const cell = (SIZE - 2 * pad) / 2
   const toPercent = (v) => ((v + 1) / 2) * 100
 
@@ -309,7 +302,7 @@ function QuadrantMap({ creativity, control, color, compact }) {
   ]
 
   return (
-    <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: compact ? 16 : 22, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: compact ? 18 : 24, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden' }}>
       {cells.map(({ geo, key }) => {
         const q = QUADRANTS[key]
         const active = key === highlightKey
@@ -318,13 +311,12 @@ function QuadrantMap({ creativity, control, color, compact }) {
             key={key}
             style={{
               position: 'absolute', left: geo.left, top: geo.top, width: cell, height: cell,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
               background: active ? q.color : `${q.color}14`,
-              transition: 'background 0.4s, opacity 0.4s',
             }}
           >
-            <span style={{ color: active ? '#fff' : q.color, fontSize: compact ? 13 : 18, fontWeight: 800, letterSpacing: '0.04em', opacity: active ? 1 : 0.7 }}>{q.id}</span>
-            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.55)', fontSize: compact ? 9.5 : 13, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px' }}>{q.label}</span>
+            <span style={{ color: active ? '#fff' : q.color, fontSize: compact ? 17 : 22, fontWeight: 800, letterSpacing: '0.04em', opacity: active ? 1 : 0.75 }}>{q.id}</span>
+            <span style={{ color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)', fontSize: compact ? 12 : 16, fontWeight: 600, textAlign: 'center', lineHeight: 1.15, padding: '0 6px' }}>{q.label}</span>
           </div>
         )
       })}
@@ -332,52 +324,37 @@ function QuadrantMap({ creativity, control, color, compact }) {
       <div style={{ position: 'absolute', left: pad + cell, top: pad, width: 1, height: SIZE - 2 * pad, background: 'rgba(255,255,255,0.18)' }} />
       <div style={{ position: 'absolute', left: pad, top: pad + cell, width: SIZE - 2 * pad, height: 1, background: 'rgba(255,255,255,0.18)' }} />
       {/* user dot */}
-      <div style={{ position: 'absolute', left: x - (compact ? 9 : 14), top: y - (compact ? 9 : 14), width: compact ? 18 : 28, height: compact ? 18 : 28, borderRadius: '50%', background: color, border: '2px solid rgba(255,255,255,0.9)', boxShadow: `0 0 0 6px ${color}44, 0 0 26px ${color}` }} />
+      <div style={{ position: 'absolute', left: x - (compact ? 11 : 16), top: y - (compact ? 11 : 16), width: compact ? 22 : 32, height: compact ? 22 : 32, borderRadius: '50%', background: color, border: '2px solid rgba(255,255,255,0.9)', boxShadow: `0 0 0 6px ${color}44, 0 0 30px ${color}` }} />
     </div>
   )
 }
 
 function BrandBlock({ color }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-9 h-9 rounded-lg flex items-center justify-center shadow-lg shrink-0">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <div className="flex items-center gap-3">
+      <div style={{ background: `linear-gradient(135deg, ${color}, #8b5cf6)` }} className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
         </svg>
       </div>
       <div>
-        <div className="text-white text-[13px] font-bold leading-none">My Inner AI Personality</div>
-        <div className="text-white/50 text-[11px] leading-tight mt-0.5">Meet the AI that's most like you</div>
+        <div className="text-white text-[15px] font-bold leading-none">My Inner AI Personality</div>
+        <div className="text-white/55 text-[12px] leading-tight mt-0.5">Meet the AI that's most like you</div>
       </div>
     </div>
   )
 }
 
-function ShareBar({ label, left, right, value, color }) {
-  const pos = ((value + 1) / 2) * 100
+// A large, bold stat readout in the style of a sports/trading card — the
+// number is the hero, with a small axis label and a thin fill bar behind it.
+function BigStat({ label, value, color }) {
   return (
-    <div>
-      <div className="flex justify-between text-[10px] text-white/50 font-medium mb-0.5">
-        <span className="font-bold text-white/70">{label}</span>
-        <span style={{ color }} className="font-bold">{Math.round(value * 100)}</span>
+    <div className="rounded-2xl px-4 py-3 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33` }}>
+      <div className="text-white/55 text-[10px] sm:text-xs font-bold uppercase tracking-[0.12em]">{label}</div>
+      <div className="text-white text-4xl sm:text-5xl font-extrabold leading-none my-1" style={{ color, textShadow: `0 0 26px ${color}66` }}>{value}</div>
+      <div className="mx-auto h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${value}%`, background: `linear-gradient(90deg, ${color}55, ${color})` }} />
       </div>
-      <div className="flex justify-between text-[10px] text-white/50 font-medium mb-1">
-        <span>{left}</span>
-        <span>{right}</span>
-      </div>
-      <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
-        <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pos}%`, background: `linear-gradient(90deg, ${color}66, ${color})` }} />
-        <div className="absolute inset-y-0 left-1/2 w-px bg-white/20" />
-      </div>
-    </div>
-  )
-}
-
-function ShareStat({ label, value, color }) {
-  return (
-    <div className="rounded-lg px-3 py-2 bg-white/5 border border-white/10 text-center">
-      <div className="text-[10px] text-white/50 font-medium">{label}</div>
-      <div className="text-white font-bold text-sm" style={{ color }}>{value}</div>
     </div>
   )
 }
