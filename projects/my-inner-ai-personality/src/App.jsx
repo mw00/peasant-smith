@@ -106,7 +106,7 @@ function Header({ dark, toggleDark, progress }) {
           </div>
           <div>
             <h1 className="text-base font-bold leading-tight tracking-tight">My Inner AI Personality</h1>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 -mt-0.5">Discover which AI you are</p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 -mt-0.5">Discover which AI parameters better suit your personality</p>
           </div>
         </div>
         <button
@@ -308,6 +308,11 @@ function Result({ result, reset }) {
           Re-take quiz
         </button>
       </div>
+
+      <p className="mt-8 text-center text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 max-w-md mx-auto">
+        This is intended for fun only — the same parameters may give different
+        results when used on different language models.
+      </p>
     </div>
   )
 }
