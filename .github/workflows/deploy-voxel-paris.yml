@@ -1,0 +1,37 @@
+name: Deploy Voxel Paris to Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['projects/voxel-paris/**', 'index.html']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage the site (app at /voxel-paris/ + hub at root)
+        run: |
+          mkdir -p _site/voxel-paris
+          cp -r projects/voxel-paris/* _site/voxel-paris/
+          cp index.html _site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          name: github-pages
+      - id: deployment
+        uses: actions/deploy-pages@v4
