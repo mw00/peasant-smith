@@ -1,6 +1,6 @@
 # Recipe: Qwen3.8-Flash-Next (IQ3_XXS) on 2× Tesla V100 32GB
 
-A complete, reproducible recipe for running a 131B-class MoE model with **MTP
+A complete, reproducible recipe for running a large sparse MoE model with **MTP
 speculative decoding** and **vision** on two datacenter Volta GPUs — hardware
 that most current inference stacks have quietly stopped supporting.
 
@@ -298,6 +298,10 @@ import sys,json; print(json.load(sys.stdin)['models'][0].get('capabilities'))"
 
 Then confirm with an actual image request — capabilities alone only proves the
 projector loaded, not that inference on images works.
+
+> **Vision accuracy note:** this is a Qwen-VL architecture. The server logs a
+> warning that these models need at least 1024 image tokens. If vision results
+> look wrong, add `--image-min-tokens 1024`.
 
 **Tool calling** (needed for agent use): send a request with a `tools` array
 and confirm `finish_reason: "tool_calls"`.
