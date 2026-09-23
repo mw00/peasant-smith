@@ -75,6 +75,7 @@ a dense 31B at similar quality would not fit at all.
 | A tested system's full spec | [`data/systems.csv`](data/systems.csv) → [`hardware/systems/`](hardware/systems/) |
 | Run a benchmark yourself | [`scripts/benchmark/run_benchmark.py`](scripts/benchmark/run_benchmark.py) |
 | Model-vs-model deep dives | [`docs/qwen27b-vs-ornith-15.md`](docs/qwen27b-vs-ornith-15.md) (dense 27B Q5 vs 35B-A3B MoE Q6, per-test results + reproduction) |
+| **Copy a full working setup** | [`recipes/`](recipes/) — end-to-end recipes for specific model + hardware combos |
 
 ## Project structure
 
@@ -85,6 +86,7 @@ a dense 31B at similar quality would not fit at all.
 | [`models/`](models/) | Model profiles with quant guidance |
 | [`data/`](data/) | Flat-file databases (CSV): benchmarks, hardware, systems, models |
 | [`docs/`](docs/) | Tests, scoring, methodology, definitions |
+| [`recipes/`](recipes/) | End-to-end recipes: exact flags + results for a model on specific hardware |
 | [`scripts/`](scripts/) | Benchmark runner, validators, scoring engine, migrations |
 
 ## How a result becomes a record
