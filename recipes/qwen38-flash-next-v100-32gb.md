@@ -38,6 +38,12 @@ VRAM or RAM.
 Two used V100-PCIE-32GB cards give 64 GB of VRAM for a fraction of the price of
 a single modern 48 GB card. The catch is software support, not silicon.
 
+> **Pricing note:** used V100 prices move constantly and vary widely by seller,
+> condition, and whether the card is SXM2 or PCIe. As of **23 September 2026**,
+> refurbished V100-PCIE-32GB cards were listed around **£550 (~$735) each**, with
+> a 1-year warranty. Treat that as a dated reference point, not a current quote —
+> check live listings before budgeting. FX at 1 GBP = 1.33 USD on the same date.
+
 > Full recipe, all measurements, and the tuning matrix that produced them:
 > **[`recipes/qwen38-flash-next-v100-32gb.md`](https://github.com/mw00/peasant-smith/blob/main/recipes/qwen38-flash-next-v100-32gb.md)**
 
