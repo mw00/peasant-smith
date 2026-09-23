@@ -1,8 +1,24 @@
 # Recipe: Qwen3.8-Flash-Next (IQ3_XXS) on 2× Tesla V100 32GB
 
-A complete, reproducible recipe for running a large sparse MoE model with **MTP
-speculative decoding** and **vision** on two datacenter Volta GPUs — hardware
-that most current inference stacks have quietly stopped supporting.
+A complete, reproducible recipe for running a **125B-parameter (A6B) sparse MoE**
+model with **MTP speculative decoding** and **vision** on two datacenter Volta
+GPUs — hardware that most current inference stacks have quietly stopped
+supporting.
+
+## Model
+
+| Property | Value |
+|---|---|
+| Total parameters | **125B** |
+| Active parameters | **A6B** (~6B per token) |
+| Architecture | Sparse MoE, Qwen-VL (multimodal) |
+| Ngram model | **51B** (lookup table) |
+| Quantization | IQ3_XXS |
+| MTP draft head | shared, Q8_0 |
+
+The 51B ngram lookup table is the reason `-lm mmap --lazy-mode on` matters: it is
+large, but it is a lookup table, so it can be paged from SSD instead of held in
+VRAM or RAM.
 
 ## Results at a glance
 
@@ -45,8 +61,52 @@ a single modern 48 GB card. The catch is software support, not silicon.
 |---|---|---|
 | NVIDIA driver | 580.178.04 | Modern drivers still support Volta |
 | CUDA toolkit | **12.8** | **CUDA 13 does not support sm_70** |
-| llama.cpp | b11030-mix | Must include `--spec-type draft-mtp` |
+| llama.cpp | **b11030-mix-5ff778e** | Unsloth prebuilt, `cuda12-portable` bundle |
 | OS | Ubuntu 22.04 / 24.04 | |
+
+### The exact llama.cpp build
+
+This recipe is verified against one specific prebuilt bundle. Pin it:
+
+| Field | Value |
+|---|---|
+| Version tag | `b11030-mix-5ff778e` |
+| Source repo | `unslothai/llama.cpp` (fork) |
+| Source commit | `6ba30d05b140ebb0baeded27d7d9b843c5b71ff1` |
+| Bundle variant | `cuda12-portable` |
+| Release asset | `app-b11030-mix-5ff778e-linux-x64-cuda12-portable.tar.gz` |
+| Toolkit | CUDA 12.8 |
+| `min sm` / `max sm` | **70** / 120 |
+| Supported SMs | 70, 75, 80, 86, 89, 90, 100, 103, 120 |
+
+Download from the release page — pick the **`cuda12-portable`** asset for x64:
+
+```
+https://github.com/unslothai/llama.cpp/releases/tag/b11030-mix-5ff778e
+```
+
+The bundle reports its own provenance. Check it after extracting:
+
+```bash
+cat BUILD_INFO.txt
+# llama.cpp version: b11030-mix-5ff778e
+# variant: cuda12-portable
+# toolkit version: 12.8
+# min sm: 70
+```
+
+And confirm the running binary matches:
+
+```bash
+./llama-server --version
+# version: 0.4.1-dev (build 11030, commit 6ba30d05b)
+# built with GNU 11.4.0 for Linux x86_64 (Compiled by the Unsloth team)
+```
+
+> **Why this specific build:** it carries the `--spec-type draft-mtp` support
+> needed for MTP speculative decoding, and the `cuda12-portable` variant is the
+> one whose `min sm` of 70 includes Volta. Same release, different asset — the
+> `cuda12-newer` bundle drops sm_70.
 
 ---
 
@@ -142,18 +202,18 @@ for f in ['Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf',
 
 ## Step 3 — Understand the memory layout
 
-The model (~55 GB of weights) is large relative to 64 GB of total VRAM, so
-allocation strategy matters more than raw compute.
+The model (~55 GB of weights: 125B parameters at IQ3_XXS) is large relative to
+64 GB of total VRAM, so allocation strategy matters more than raw compute.
 
 Three things make this fit:
 
 1. **`-ncmoe 0`** — all MoE expert layers on GPU. This is the single most
    important flag. Without it, experts spill to CPU and throughput collapses
    from ~54 tok/s to ~19 tok/s.
-2. **`--lazy-mode on` + `-lm mmap`** — the large lookup table stays lazily
-   paged from SSD. Process RSS stays around 1.8 GB while ~55 GB sits in VRAM.
-   If weights were being read from disk you would see gigabytes of I/O per run;
-   measured I/O is ~71 MB, which confirms only the lookup table is on disk.
+2. **`--lazy-mode on` + `-lm mmap`** — the **51B ngram lookup table** stays
+   lazily paged from SSD. Process RSS stays around 1.8 GB while ~55 GB sits in
+   VRAM. If weights were being read from disk you would see gigabytes of I/O per
+   run; measured I/O is ~71 MB, which confirms only the lookup table is on disk.
 3. **`--tensor-split 55,45`** — see Step 5.
 
 Measure your own footprint to size the split:
@@ -541,4 +601,5 @@ tensor split.
 ---
 
 *All measurements taken on 2× Tesla V100-PCIE-32GB (sm_70), driver 580.178.04,
-CUDA 12.8, llama.cpp b11030, greedy decoding.*
+CUDA 12.8, llama.cpp **b11030-mix-5ff778e** (`cuda12-portable`, commit
+`6ba30d0`), greedy decoding.*
