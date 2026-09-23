@@ -38,6 +38,9 @@ VRAM or RAM.
 Two used V100-PCIE-32GB cards give 64 GB of VRAM for a fraction of the price of
 a single modern 48 GB card. The catch is software support, not silicon.
 
+> Full recipe, all measurements, and the tuning matrix that produced them:
+> **[`recipes/qwen38-flash-next-v100-32gb.md`](https://github.com/mw00/peasant-smith/blob/main/recipes/qwen38-flash-next-v100-32gb.md)**
+
 ---
 
 ## Hardware requirements
@@ -166,24 +169,72 @@ nvcc --version
 
 ## Step 2 — Download the model and its two companions
 
-The most easily missed part: **the vision projector and the MTP draft head live
-in the same repository as the quantized model.** If you pull only the quant
-subdirectory, you get a text-only model with no speculative decoding.
+Three separate sources are involved, and this is the most easily missed part.
+Pull only the quant subdirectory and you get a text-only model with no
+speculative decoding.
 
-Upstream repository: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF`
+| File | Source repo | Path within repo |
+|---|---|---|
+| Model shards (2) | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF` | `IQ3_XXS/` |
+| Vision projector | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF` | **repo root** |
+| MTP draft head | `unsloth/Qwen3.8-Flash-Next-GGUF` | `MTP/` |
 
-A convenience mirror containing all four files in one place:
-`peasantsmith/qwen38-flash-next-v100-recipe` (Hugging Face, private — request
-access or mirror from upstream).
+Note the vision projector sits at the **root** of the quant repo while the model
+shards are in a subdirectory — a common source of "file not found". The MTP head
+comes from a **different repository entirely**.
+
+### Model shards and vision projector
+
+```bash
+hf download ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF \
+  --include "IQ3_XXS/*" --local-dir .
+hf download ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF \
+  mmproj-Qwen3.8-Flash-Next-BF16.gguf --local-dir .
+```
+
+### MTP draft head
+
+```bash
+hf download unsloth/Qwen3.8-Flash-Next-GGUF \
+  --include "MTP/*" --local-dir .
+```
+
+Use **`mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf`** (2.60 GB). It is the fastest of
+the MTP head variants:
+
+| MTP head | Size | Notes |
+|---|---|---|
+| **`shared-Q8_0`** | **2.60 GB** | **recommended — fastest** |
+| `shared-Q4_K_M` | 1.78 GB | smaller, ~2 points less acceptance |
+| `shared-BF16` | 4.87 GB | bigger *and* slower than Q8_0 |
+| `Q8_0` / `Q4_K_M` / `BF16` | 3.85 / 2.60 / 7.24 GB | self-contained variants |
+
+The `shared-` heads borrow the token embedding and output projection from the
+model already loaded, saving ~1.3 GB. They draft identically to the
+self-contained files, which carry their own copies and are only needed on builds
+without borrowing support. BF16 is both bigger and slower: a draft step is
+dominated by the output projection, which is cheaper to execute at 8 bits.
+
+A convenience mirror of the two small files (MTP head + vision projector) in one
+place, so you do not need to visit two repos:
+[`peasantsmith/qwen38-flash-next-v100-recipe`](https://huggingface.co/peasantsmith/qwen38-flash-next-v100-recipe)
+(Hugging Face, private — request access, or fetch from the original repos above).
 
 Files required:
 
 | File | Size | Purpose |
 |---|---|---|
 | `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf` | 47.0 GB | Model weights (shard 1) |
-| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf` | 28.8 GB | Model weights (shard 2) |
-| `mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf` | 2.8 GB | **MTP draft head** — speculative decoding |
-| `mmproj-Qwen3.8-Flash-Next-BF16.gguf` | 0.9 GB | **Vision projector** |
+| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf` | 28.8 GB | **51.2B n-gram table** (shard 2) |
+| `mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf` | 2.6 GB | **MTP draft head** — speculative decoding |
+| `mmproj-Qwen3.8-Flash-Next-BF16.gguf` | 0.91 GB | **Vision projector** |
+
+**Shard 2 is not more weights.** It holds the per-layer n-gram embedding table
+(`per_layer_token_embd`, 51.2B parameters) at IQ4_NL. That table is a lookup, not
+a matmul weight, so it is held at a fixed ~4.5 bpw in every quant variant and is
+byte-identical across them. In practice this means shard 2 is the part whose
+residency you control with `-lm` (see Step 3).
+
 
 Verify shard integrity before serving — each file must begin with the ASCII
 magic `GGUF`:
@@ -210,16 +261,28 @@ Three things make this fit:
 1. **`-ncmoe 0`** — all MoE expert layers on GPU. This is the single most
    important flag. Without it, experts spill to CPU and throughput collapses
    from ~54 tok/s to ~19 tok/s.
-2. **`--lazy-mode on` + `-lm mmap`** — the **51B ngram lookup table** stays
-   lazily paged from SSD. Process RSS stays around 1.8 GB while ~55 GB sits in
-   VRAM. If weights were being read from disk you would see gigabytes of I/O per
-   run; measured I/O is ~71 MB, which confirms only the lookup table is on disk.
+2. **`--lazy-mode on` + `-lm mmap`** — the **51.2B n-gram lookup table**
+   (shard 2) stays lazily paged from SSD. Process RSS stays around 1.8 GB while
+   ~55 GB sits in VRAM. If weights were being read from disk you would see
+   gigabytes of I/O per run; measured I/O is ~71 MB, which confirms only the
+   lookup table is on disk.
 3. **`--tensor-split 55,45`** — see Step 5.
 
-Measure your own footprint to size the split:
+> **Should the n-gram table be in RAM?** Upstream recommends holding it in RAM
+> where memory allows, to remove paging cost entirely. On this hardware, measured
+> end to end, it made no measurable difference: `-lm mmap` (paged from SSD) gave
+> 102.2 tok/s against 103.3 tok/s with the table resident — within run-to-run
+> noise. The workload is bound by model-weight bandwidth, not table access. Prefer
+> the default `-lm mmap` unless you have RAM to spare and see paging in `iostat`.
+
+### Verify the layout
 
 ```bash
+# GPU residency should be ~55 GB of weights plus KV
 nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv,noheader
+
+# RSS stays small if the table is being paged, not resident
+ps -o rss= -p $(pgrep -f llama-server)
 ```
 
 On this hardware the natural split (`46.5 / 53.5`) is a trap — see Step 5.
