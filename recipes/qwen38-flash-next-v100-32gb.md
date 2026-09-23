@@ -8,12 +8,12 @@ that most current inference stacks have quietly stopped supporting.
 
 | Metric | Value |
 |---|---|
-| **Peak decode (tuned, short ctx)** | **96.1 tok/s** |
+| **Peak decode (tuned, short ctx)** | **103.3 tok/s** |
 | Production decode @ 131k | 80.9 tok/s |
 | Production decode @ 64k | 65.0 tok/s |
 | Production decode @ 256k | 56.2 tok/s |
 | Baseline (MTP disabled) | 42.8 tok/s |
-| **MTP speedup** | **2.25×** |
+| **MTP speedup** | **2.4×** |
 | Prefill | 176–311 tok/s |
 | Vision | ✅ working |
 | VRAM (131k, bf16 KV) | 28.1 / 30.7 GB of 64 GB |
@@ -112,7 +112,8 @@ subdirectory, you get a text-only model with no speculative decoding.
 Upstream repository: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF`
 
 A convenience mirror containing all four files in one place:
-`peasantsmith/qwen38-flash-next-v100-recipe`
+`peasantsmith/qwen38-flash-next-v100-recipe` (Hugging Face, private — request
+access or mirror from upstream).
 
 Files required:
 
@@ -210,6 +211,28 @@ the edge, so load must be moved meaningfully, not slightly.
 
 **Lesson:** "it loaded" is not "it fits." Check headroom on the tightest card.
 
+### The tensor split is also a performance lever
+
+The split is not only about fitting — it strongly affects decode speed. For
+short-context, high-`n-max` decoding, moving load onto the first card gives a
+large, reproducible gain:
+
+| `--tensor-split` | Decode (c=512, `n-max 16`) |
+|---|---|
+| **`60,40`** | **103.3 tok/s** (best of 10: 102.9 top-3 avg) |
+| `50,50` | 88.1 tok/s |
+| `55,45` (production) | 87.5 tok/s |
+| `65,35` | ❌ OOM |
+| `70,30` | ❌ OOM |
+
+An ~18% decode gain from the split alone, reproduced across 10 runs per
+configuration. Beyond `60,40` the first card runs out of VRAM.
+
+**Caveat:** this was measured at short context. At production context (131k,
+`bf16` KV) the memory budget is very different, so `60,40` should be verified
+against your own workload before adopting it. The recipe's production command
+uses `55,45`, which is the correct choice for maximum context.
+
 ### Optional: disable ECC for extra VRAM
 
 ECC can be disabled to reclaim VRAM on Tesla cards:
@@ -227,10 +250,10 @@ not fit. It does free a modest amount of VRAM for other uses.
 ## Step 6 — Tune MTP speculative decoding
 
 The MTP draft head converts single-token decode into multi-token speculative
-decode. Measured multiplier: **2.25×** (42.8 → 96.1 tok/s).
+decode. Measured multiplier: **2.4×** (42.8 → 103.3 tok/s).
 
 **`--spec-draft-n-max` has opposite optima at different context lengths.**
-This is the single most important tuning insight in this recipe.
+This is one of the two most important tuning insights in this recipe.
 
 ### Short context (4k) — ranked best to worst
 
@@ -238,9 +261,10 @@ This is the single most important tuning insight in this recipe.
 |---|---|---|
 | **16** | **96.1** | 80.6% |
 | 12 | 95.8 | 94.8% |
+| 6 (draft KV `q4_0`) | 93.9 | 100.0% |
 | 6 | 92.0 | 96.2% |
 | 4 | 91.6 | 96.2% |
-| 6 (draft KV `q4_0`) | 93.9 | 100.0% |
+| 3 | 80.3 | — |
 
 ### Long context (131k) — ranked best to worst
 
@@ -267,21 +291,28 @@ Each of these was measured and made no meaningful difference, or failed:
 | `-ub 128 / 256 / 512 / 1024` | 95.2 – 96.1 tok/s — flat |
 | `-t 6 / 12 / 24` | 95.5 – 96.1 tok/s — flat |
 | `-b 1024 / 2048 / 4096 / 8192` | ≤1% difference |
-| `-c 512 / 1024` (tiny context) | **87.5 tok/s — worse** |
+| `-c 512 / 1024` (tiny context alone) | **87.5 tok/s — worse** |
 | `n-max 20 / 24` | 94.0 / 77.4 tok/s — worse |
 | `-fa off` | fails |
 | draft KV `q4_0` | 93.9 tok/s, no gain over `bf16` |
+| `-lm lock` | rejected (`invalid value`) |
+| `-lm` default (lookup table in RAM) | 103.3 vs 102.2 — within noise |
+| `-nkvo 1` | rejected (`invalid argument`) |
+| `q2_K` / `q3_K` KV | rejected (`Unsupported cache type`) |
 
-Two counterintuitive results worth stating plainly:
+Three counterintuitive results worth stating plainly:
 
 - **Reducing context does not increase decode speed.** 512-token and 1k
   contexts measured *slower* (87.5) than the 4k configuration (96.1), with
-  lower draft acceptance.
+  lower draft acceptance. The gain at 103 tok/s comes from combining a short
+  context *with* an asymmetric tensor split, not from the short context itself.
 - **Batch size and thread count are effectively irrelevant** here. The workload
   is bandwidth-bound on the model weights; those knobs do not move it.
+- **Where the lookup table lives is irrelevant.** Paging it from SSD via
+  `-lm mmap` and holding it in RAM measured within noise of each other (~1%).
 
-The practical ceiling on this hardware is **~96 tok/s decode**, reached with
-short context and high `n-max`.
+The practical ceiling on this hardware is **103.3 tok/s decode**, reached with
+a short context, `n-max 16`, and `--tensor-split 60,40`.
 
 ---
 
@@ -403,11 +434,15 @@ they scale differently.
 
 | Configuration | Decode |
 |---|---|
-| Short ctx, `n-max 16`, draft KV `q4_0` | **96.1 tok/s** |
+| **Short ctx, `tensor-split 60,40`, `n-max 16`** | **103.3 tok/s** |
+| Short ctx, `tensor-split 60,40`, `n-max 16`, `-lm mmap` | 102.2 tok/s |
+| Short ctx, `n-max 16`, `tensor-split 55,45` | 96.1 tok/s |
 | Short ctx, `n-max 12` | 95.8 tok/s |
 | Short ctx, `n-max 6`, draft KV `q4_0` | 93.9 tok/s |
 | Short ctx, `n-max 6`, `b4096/ub1024` | 92.0 tok/s |
 | Short ctx, `n-max 4` | 91.6 tok/s |
+| Short ctx, `tensor-split 50,50` | 88.1 tok/s |
+| Short ctx, `n-max 16`, `c=512` only (no split change) | 87.5 tok/s |
 | Short ctx, `n-max 3` | 80.3 tok/s |
 | **Production @ 131k, `n-max 3`** | **80.9 tok/s** |
 | Production @ 64k, `n-max 3` | 65.0 tok/s |
@@ -468,9 +503,14 @@ tensor split.
 - **The default tensor split is a trap** at long context — it loads with ~500 MB
   of headroom and OOMs under KV growth.
 - **`n-max` optima invert between short and long context.** Tune per regime.
+- **The tensor split affects decode speed, not just fit.** `60,40` gave ~18%
+  more decode than `55,45` at short context. Verify against your own memory
+  budget before adopting.
 - **`q2_K` / `q3_K` are not valid KV cache types** — the server rejects them at
   startup. `q4_0` is the floor.
-- **Smaller context is not faster.** 512-token context measured slower than 4k.
+- **`-lm lock` and `-nkvo 1` are rejected** by this build.
+- **Smaller context is not faster.** 512-token context alone measured slower
+  than 4k.
 - **Disabling ECC did not enable anything** that otherwise failed.
 - **`reasoning_effort` is silently ignored** by llama.cpp. Only
   `chat_template_kwargs: {"enable_thinking": false}` changes behaviour.
