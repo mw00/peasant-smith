@@ -4,17 +4,22 @@ A complete, reproducible recipe for running a large sparse MoE model with **MTP
 speculative decoding** and **vision** on two datacenter Volta GPUs — hardware
 that most current inference stacks have quietly stopped supporting.
 
-Reference results on this exact hardware and config:
+## Results at a glance
 
-- **65.0 tok/s** decode @ 64k context
-- **80.9 tok/s** decode @ 131k context
-- **56.2 tok/s** decode @ 256k context
-- **305–387 tok/s** prefill
-- Full multimodal (text + image input)
+| Metric | Value |
+|---|---|
+| **Peak decode (tuned, short ctx)** | **96.1 tok/s** |
+| Production decode @ 131k | 80.9 tok/s |
+| Production decode @ 64k | 65.0 tok/s |
+| Production decode @ 256k | 56.2 tok/s |
+| Baseline (MTP disabled) | 42.8 tok/s |
+| **MTP speedup** | **2.25×** |
+| Prefill | 176–311 tok/s |
+| Vision | ✅ working |
+| VRAM (131k, bf16 KV) | 28.1 / 30.7 GB of 64 GB |
 
-Cost note: two used V100-PCIE-32GB cards represent a fraction of the price of
-a single modern 48GB card, while offering 64GB of VRAM total. The catch is
-software support, not silicon.
+Two used V100-PCIE-32GB cards give 64 GB of VRAM for a fraction of the price of
+a single modern 48 GB card. The catch is software support, not silicon.
 
 ---
 
@@ -23,9 +28,9 @@ software support, not silicon.
 | Component | Requirement |
 |---|---|
 | GPU | 2× Tesla V100-PCIE-32GB (compute capability **7.0 / sm_70**) |
-| Total VRAM | 64 GB (model needs ~55 GB) |
-| System RAM | 32 GB minimum (16 GB works with mmap + lazy loading) |
-| Storage | NVMe strongly recommended (model + MTP head + mmproj ≈ 60 GB) |
+| Total VRAM | 64 GB (model weights ~55 GB) |
+| System RAM | 32 GB minimum (mmap + lazy loading reduces this a lot) |
+| Storage | NVMe strongly recommended (model + MTP head + mmproj ≈ 74 GB) |
 
 > **Why the V100 specifically:** it is Volta — **sm_70**. Modern CUDA releases
 > and prebuilt inference bundles have largely dropped it. Nearly every problem
@@ -39,7 +44,7 @@ software support, not silicon.
 |---|---|---|
 | NVIDIA driver | 580.178.04 | Modern drivers still support Volta |
 | CUDA toolkit | **12.8** | **CUDA 13 does not support sm_70** |
-| llama.cpp | b11030-mix or newer | Must include `--spec-type draft-mtp` |
+| llama.cpp | b11030-mix | Must include `--spec-type draft-mtp` |
 | OS | Ubuntu 22.04 / 24.04 | |
 
 ---
@@ -104,22 +109,25 @@ The most easily missed part: **the vision projector and the MTP draft head live
 in the same repository as the quantized model.** If you pull only the quant
 subdirectory, you get a text-only model with no speculative decoding.
 
-Repository: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF`
+Upstream repository: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF`
+
+A convenience mirror containing all four files in one place:
+`peasantsmith/qwen38-flash-next-v100-recipe`
 
 Files required:
 
-| File | Purpose |
-|---|---|
-| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf` | Model weights (shard 1) |
-| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf` | Model weights (shard 2) |
-| `mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf` | **MTP draft head** — speculative decoding |
-| `mmproj-Qwen3.8-Flash-Next-BF16.gguf` | **Vision projector** — ~907 MB |
+| File | Size | Purpose |
+|---|---|---|
+| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf` | 47.0 GB | Model weights (shard 1) |
+| `Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf` | 28.8 GB | Model weights (shard 2) |
+| `mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf` | 2.8 GB | **MTP draft head** — speculative decoding |
+| `mmproj-Qwen3.8-Flash-Next-BF16.gguf` | 0.9 GB | **Vision projector** |
 
-Verify shard integrity before serving:
+Verify shard integrity before serving — each file must begin with the ASCII
+magic `GGUF`:
 
 ```bash
 python3 -c "
-import struct
 for f in ['Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf',
           'Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf']:
     with open(f,'rb') as fh:
@@ -132,7 +140,7 @@ for f in ['Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf',
 
 ## Step 3 — Understand the memory layout
 
-The model is large (~55 GB of weights) relative to 64 GB of total VRAM, so
+The model (~55 GB of weights) is large relative to 64 GB of total VRAM, so
 allocation strategy matters more than raw compute.
 
 Three things make this fit:
@@ -146,8 +154,7 @@ Three things make this fit:
    measured I/O is ~71 MB, which confirms only the lookup table is on disk.
 3. **`--tensor-split 55,45`** — see Step 5.
 
-Measure your own footprint to size the split. Load with a tiny context and no
-MTP head to isolate the weight footprint:
+Measure your own footprint to size the split:
 
 ```bash
 nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv,noheader
@@ -159,8 +166,7 @@ On this hardware the natural split (`46.5 / 53.5`) is a trap — see Step 5.
 
 ## Step 4 — KV cache quantization
 
-KV cache type has a large effect on both memory and speed, and the result is
-not what you would guess:
+KV type has a large effect on both memory and speed.
 
 | KV type | 131k ctx | 256k ctx |
 |---|---|---|
@@ -171,9 +177,13 @@ not what you would guess:
 Two findings worth knowing:
 
 - **`bf16` consistently outperforms `f16`** by roughly 4%, reproducible across
-  runs. Report the measurement; the mechanism is not established.
+  runs. The measurement is solid; the mechanism is not established.
 - **Only quantized KV makes 256k context possible at all.** It costs roughly
   30% of decode throughput but halves KV memory.
+
+Valid cache types in this build: `f32, f16, bf16, q8_0, q4_0, q4_1, iq4_nl,
+q5_0, q5_1`. **`q2_K` and `q3_K` are not accepted** — the server exits with
+`Unsupported cache type` — so `q4_0` is effectively the floor.
 
 Choose per your priorities: `bf16` for speed at ≤131k, `q8_0`/`q4_0` if you
 need 256k.
@@ -195,8 +205,8 @@ Measured balance:
 | `52,48` | 26,082 | 31,466 | 1.3 GB |
 | **`55,45`** | **26,932** | **30,618** | **2.2 GB** ✅ |
 
-Note that a split *near* the natural ratio still fails — the natural split is
-already at the edge, so load must be moved meaningfully, not slightly.
+A split *near* the natural ratio still fails — the natural split is already at
+the edge, so load must be moved meaningfully, not slightly.
 
 **Lesson:** "it loaded" is not "it fits." Check headroom on the tightest card.
 
@@ -208,31 +218,33 @@ ECC can be disabled to reclaim VRAM on Tesla cards:
 sudo nvidia-smi -e 0
 ```
 
-On this hardware this did **not** change the outcome for `bf16` KV at 256k —
-it still OOMs. Do not count on it to unlock a configuration that otherwise
-does not fit.
+On this hardware this did **not** change the outcome for `bf16` KV at 256k — it
+still OOMs. Do not count on it to unlock a configuration that otherwise does
+not fit. It does free a modest amount of VRAM for other uses.
 
 ---
 
 ## Step 6 — Tune MTP speculative decoding
 
 The MTP draft head converts single-token decode into multi-token speculative
-decode. Measured multiplier: **2.1×** (42.8 → 90.9 tok/s).
+decode. Measured multiplier: **2.25×** (42.8 → 96.1 tok/s).
 
 **`--spec-draft-n-max` has opposite optima at different context lengths.**
+This is the single most important tuning insight in this recipe.
 
-Short context (4k), best of 5 runs:
+### Short context (4k) — ranked best to worst
 
-| `n-max` | tok/s |
-|---|---|
-| 3 | 80.3 |
-| **6** | **90.9** |
-| 8 | 80.6 |
-| 10 | 90.5 |
+| `n-max` | tok/s | Acceptance |
+|---|---|---|
+| **16** | **96.1** | 80.6% |
+| 12 | 95.8 | 94.8% |
+| 6 | 92.0 | 96.2% |
+| 4 | 91.6 | 96.2% |
+| 6 (draft KV `q4_0`) | 93.9 | 100.0% |
 
-Long context (131k), with draft acceptance:
+### Long context (131k) — ranked best to worst
 
-| `n-max` | tok/s | acceptance |
+| `n-max` | tok/s | Acceptance |
 |---|---|---|
 | **3** | **80.9** | — |
 | 4 | 63.4 | 64.0% |
@@ -240,15 +252,43 @@ Long context (131k), with draft acceptance:
 | 7 | 49.3 | 42.6% |
 | 8 | 38.5 | 38.5% |
 
-At long context, raising `n-max` is **strictly worse** — draft acceptance
-collapses because the head predicts poorly over longer horizons against a large
-KV cache. At short context the same setting is a clear win.
+At long context, raising `n-max` is **strictly worse** — acceptance collapses
+because the draft head predicts poorly over longer horizons against a large KV
+cache. At short context the same setting is a clear win.
 
-**Tune this per context regime, not once globally.**
+**Tune `n-max` per context regime, not once globally.**
+
+### What does not help
+
+Each of these was measured and made no meaningful difference, or failed:
+
+| Change | Result |
+|---|---|
+| `-ub 128 / 256 / 512 / 1024` | 95.2 – 96.1 tok/s — flat |
+| `-t 6 / 12 / 24` | 95.5 – 96.1 tok/s — flat |
+| `-b 1024 / 2048 / 4096 / 8192` | ≤1% difference |
+| `-c 512 / 1024` (tiny context) | **87.5 tok/s — worse** |
+| `n-max 20 / 24` | 94.0 / 77.4 tok/s — worse |
+| `-fa off` | fails |
+| draft KV `q4_0` | 93.9 tok/s, no gain over `bf16` |
+
+Two counterintuitive results worth stating plainly:
+
+- **Reducing context does not increase decode speed.** 512-token and 1k
+  contexts measured *slower* (87.5) than the 4k configuration (96.1), with
+  lower draft acceptance.
+- **Batch size and thread count are effectively irrelevant** here. The workload
+  is bandwidth-bound on the model weights; those knobs do not move it.
+
+The practical ceiling on this hardware is **~96 tok/s decode**, reached with
+short context and high `n-max`.
 
 ---
 
-## Step 7 — The full command
+## Step 7 — The full command (production)
+
+This is the balanced configuration: maximum context, vision, and the best
+long-context decode speed.
 
 ```bash
 ./llama-server \
@@ -275,8 +315,8 @@ KV cache. At short context the same setting is a clear win.
 | `-ncmoe 0` | All MoE experts on GPU. **Most important flag.** 19 → 54 tok/s |
 | `--lazy-mode on` + `-lm mmap` | Lookup table paged from SSD; keeps RAM use low |
 | `--tensor-split 55,45` | Prevents the second card from being pegged |
-| `-fa on` | Flash attention |
-| `-ctk/-ctv bf16` | Fastest KV type in testing |
+| `-fa on` | Flash attention (required — `off` fails) |
+| `-ctk/-ctv bf16` | Fastest KV type measured |
 | `-ctkd/-ctvd bf16` | Draft model KV — match the main model |
 | `--spec-type draft-mtp` | Enables MTP speculative decoding |
 | `--spec-draft-n-max 3` | Optimal at long context; raise for short context |
@@ -303,8 +343,8 @@ projector loaded, not that inference on images works.
 > warning that these models need at least 1024 image tokens. If vision results
 > look wrong, add `--image-min-tokens 1024`.
 
-**Tool calling** (needed for agent use): send a request with a `tools` array
-and confirm `finish_reason: "tool_calls"`.
+**Tool calling** (needed for agent use): send a request with a `tools` array and
+confirm `finish_reason: "tool_calls"`.
 
 **Speed**, from the response body:
 
@@ -317,8 +357,8 @@ and confirm `finish_reason: "tool_calls"`.
 
 ## Step 9 — Survive a reboot
 
-Wrap it in a systemd unit so it comes back after a restart. The important
-detail is waiting for the GPUs before allocating ~55 GB of VRAM:
+Wrap it in a systemd unit so it comes back after a restart. The important detail
+is waiting for the GPUs before allocating ~55 GB of VRAM.
 
 ```ini
 [Unit]
@@ -353,32 +393,67 @@ systemctl is-enabled llamacpp.service   # must print: enabled
 
 ---
 
-## Results
+## Performance reference
 
-All figures: greedy decoding (temperature 0), 180-token generations, median of
-3–5 runs, identical prompt.
+All figures: greedy decoding (temperature 0), 180-token generations, best of
+3–7 runs, identical prompt. Decode and prefill are reported separately because
+they scale differently.
 
-| Metric | Value |
+### Decode by configuration (ranked)
+
+| Configuration | Decode |
 |---|---|
-| Decode @ 64k, bf16 KV, n-max 3 | 65.0 tok/s |
-| Decode @ 131k, bf16 KV, n-max 3 | **80.9 tok/s** |
-| Decode @ 256k, q8_0/q4_0 KV | 56.2 tok/s |
-| Prefill (12k prompt) | 305–387 tok/s |
-| Peak short-context decode | 90.9 tok/s |
-| MTP disabled (baseline) | 42.8 tok/s |
-| **MTP speedup** | **2.1×** |
-| VRAM used (131k, bf16) | 28.1 / 30.7 GB of 64 GB |
+| Short ctx, `n-max 16`, draft KV `q4_0` | **96.1 tok/s** |
+| Short ctx, `n-max 12` | 95.8 tok/s |
+| Short ctx, `n-max 6`, draft KV `q4_0` | 93.9 tok/s |
+| Short ctx, `n-max 6`, `b4096/ub1024` | 92.0 tok/s |
+| Short ctx, `n-max 4` | 91.6 tok/s |
+| Short ctx, `n-max 3` | 80.3 tok/s |
+| **Production @ 131k, `n-max 3`** | **80.9 tok/s** |
+| Production @ 64k, `n-max 3` | 65.0 tok/s |
+| Production @ 256k, `q8_0`/`q4_0` KV | 56.2 tok/s |
+| **MTP disabled (baseline)** | **42.8 tok/s** |
 
-### Context is nearly free
+### Decode vs context length (production config)
 
-| Context | bf16 KV | q8_0/q4_0 KV |
+| Context | Decode |
+|---|---|
+| 713 | 57.4 tok/s |
+| 4,716 | 56.1 tok/s |
+| 6,116 | 52.8 tok/s |
+| 11,016 | 48.3 tok/s |
+| 14,516 | 43.6 tok/s |
+| 21,516 | 37.7 tok/s |
+
+### Prefill vs prompt length (production config)
+
+| Prompt tokens | Prefill |
+|---|---|
+| 2,413 | 278 tok/s |
+| 5,316 | **285 tok/s** |
+| 10,116 | 273 tok/s |
+| 19,716 | 249 tok/s |
+| 36,516 | 213 tok/s |
+| 48,516 | 176 tok/s |
+
+Both curves decline as context grows: prefill −38% and decode −34% from the
+smallest to the largest measured size.
+
+### Thermals under sustained load
+
+15.3 minutes of continuous inference, 451 samples, ambient uncontrolled:
+
+| | GPU 0 | GPU 1 |
 |---|---|---|
-| 64k | 64.9 | 57.0 |
-| 128k | 64.7 | 56.8 |
-| 256k | ❌ OOM | 56.2 |
+| Temperature (min/avg/max) | 32 / 39.8 / **43 °C** | 37 / 46.5 / **51 °C** |
+| Utilisation (avg/max) | 37% / 90% | 36% / 92% |
+| Power (avg/max) | 67 / 131 W | 70 / 160 W |
 
-From 64k to 256k at the same KV type: roughly **1% throughput difference**. If
-you have the VRAM, take the context.
+Idle baseline was 33 °C / 38 °C. Inference raises temperatures by only ~7 °C
+and ~9 °C respectively. These cards are nowhere near a thermal limit — the
+workload is bandwidth-bound, not power- or heat-bound. GPU 1 runs hotter and
+peaks higher on power, consistent with it carrying the larger share of the
+tensor split.
 
 ---
 
@@ -388,11 +463,14 @@ you have the VRAM, take the context.
   support is a data question, not a version-number question.
 - **CUDA 13 does not support sm_70.** Keep `/usr/local/cuda` on 12.8.
 - **`which -a nvcc`** — a distro toolkit may shadow the one you built with.
-- **The mmproj and MTP head are in the same repo as the model**, not separate
+- **The mmproj and MTP head live in the same repo as the model**, not separate
   ones. Pull the whole repository, not just the quant subdirectory.
-- **The default tensor split is a trap** at long context — it loads with
-  ~500 MB of headroom and OOMs under KV growth.
+- **The default tensor split is a trap** at long context — it loads with ~500 MB
+  of headroom and OOMs under KV growth.
 - **`n-max` optima invert between short and long context.** Tune per regime.
+- **`q2_K` / `q3_K` are not valid KV cache types** — the server rejects them at
+  startup. `q4_0` is the floor.
+- **Smaller context is not faster.** 512-token context measured slower than 4k.
 - **Disabling ECC did not enable anything** that otherwise failed.
 - **`reasoning_effort` is silently ignored** by llama.cpp. Only
   `chat_template_kwargs: {"enable_thinking": false}` changes behaviour.
