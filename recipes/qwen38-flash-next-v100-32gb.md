@@ -14,6 +14,7 @@ that most current inference stacks have quietly stopped supporting.
 | Production decode @ 256k | 56.2 tok/s |
 | Baseline (MTP disabled) | 42.8 tok/s |
 | **MTP speedup** | **2.4×** |
+| **Draft acceptance @ prod (131k, `n-max 3`)** | **87.8%** |
 | Prefill | 176–311 tok/s |
 | Vision | ✅ working |
 | VRAM (131k, bf16 KV) | 28.1 / 30.7 GB of 64 GB |
@@ -270,11 +271,19 @@ This is one of the two most important tuning insights in this recipe.
 
 | `n-max` | tok/s | Acceptance |
 |---|---|---|
-| **3** | **80.9** | — |
+| **3** | **80.9** | **87.8%** |
 | 4 | 63.4 | 64.0% |
 | 5 | 58.4 | 53.9% |
 | 7 | 49.3 | 42.6% |
 | 8 | 38.5 | 38.5% |
+
+**Measured acceptance at production settings (`n-max 3`, 131k): 87.8%.**
+
+Weighted mean over 17 distinct measured requests (2,886 tokens accepted of 3,288
+drafted). Per-request values ranged 79.1% – 100%, mean generation length 3.78
+tokens accepted per draft. At `n-max 3` the draft head proposes up to 4 tokens
+per step, so ~3.8 accepted means speculation is running near-fully-accepted —
+which is why `n-max 3` wins at long context while `n-max 7–8` collapses to ~40%.
 
 At long context, raising `n-max` is **strictly worse** — acceptance collapses
 because the draft head predicts poorly over longer horizons against a large KV
@@ -383,6 +392,20 @@ confirm `finish_reason: "tool_calls"`.
 # timings.predicted_per_second  -> decode tok/s
 # timings.prompt_per_second     -> prefill tok/s
 ```
+
+**Draft acceptance** (MTP effectiveness) — this is not exposed in the API
+response; it is logged by the server. Read it from the log:
+
+```bash
+grep -aE "draft acceptance" /path/to/server.log | tail -5
+# draft acceptance = 0.85657 (  215 accepted /   251 generated), mean len =  3.56
+```
+
+Each line gives: fraction of drafted tokens accepted, accepted/generated counts,
+and the mean number of tokens accepted per speculative step. Log lines are
+written per request, so watch the values while sending real traffic rather than
+reading them once at startup. A falling acceptance rate is the first sign that
+`n-max` is set too high for the current context length.
 
 ---
 
